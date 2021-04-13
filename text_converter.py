@@ -6,7 +6,6 @@
 # Released under GNU Public License (GPL)
 # email fred.santos.oliveira@gmail.com
 #
-from utils.text_normalization import text_normalize
 import string
 import textdistance
 from tqdm import tqdm

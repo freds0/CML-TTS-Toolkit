@@ -32,7 +32,7 @@ def download_books_dataset(lang = 'pt'):
 
     if os.path.isfile(books_filename):
         print('File {} exists!'.format(books_filename))
-        return True
+        return books_filename
 
     try:
         urllib.request.urlretrieve(url, books_filename, MyProgressBar())
@@ -40,7 +40,7 @@ def download_books_dataset(lang = 'pt'):
         print(e)
         return False
 
-    return True
+    return books_filename
 
 def download_language_dataset(lang = 'pt'):
     '''
@@ -50,7 +50,7 @@ def download_language_dataset(lang = 'pt'):
     # Choose dataset
     if lang == 'pt':
         url = 'https://dl.fbaipublicfiles.com/mls/mls_portuguese_opus.tar.gz'
-    elif lang == 'po':
+    elif lang == 'pl':
         url = 'https://dl.fbaipublicfiles.com/mls/mls_polish_opus.tar.gz'
     elif lang == 'it':
         url = 'https://dl.fbaipublicfiles.com/mls/mls_italian_opus.tar.gz'        
@@ -124,7 +124,7 @@ def extract_book_files(tar_filename_books):
 
     if os.path.isdir(basename):
         print('File {} already extracted!'.format(basename))
-        return True
+        return basename
     try:
         tar_file = tarfile.open(tar_filename_books)
         tar_file.extractall()

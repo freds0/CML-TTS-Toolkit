@@ -6,6 +6,7 @@ from utils.number_to_text import number_to_text
 vocab="abcdefghijklmnopqrstuvwxyzçãàáâêéíóôõúû\-0123456789,.;:!?' —"
 vocab = vocab + vocab.upper()
 chars_map = {'ï': 'i', 'ù': 'ú', 'ö': 'o', 'î':'i', 'ñ':' n', 'ë':'e', 'ì':'í', 'ò': 'ó', 'ũ': 'u','ẽ':'e', 'ü':'u', 'è':'é', 'æ':'a', 'å': 'a', '«': '', '»' : '', '’': "'"}
+general_chars_map = {'«': '', '»' : '', '’': "'"}
 
 def get_number_of_words(sentence):
         # counting number of words on sentence
@@ -125,7 +126,7 @@ def remove_html_tags(text):
     return re.sub(clean, '', text)
 
 
-def text_normalize(text):
+def portuguese_text_normalize(text):
     text = text.replace('\n', ' ')
     text = remove_html_tags(text)
     accents = ('COMBINING ACUTE ACCENT', 'COMBINING GRAVE ACCENT') #portuguese
@@ -152,6 +153,27 @@ def text_normalize(text):
 
     return text.strip()
 
+def polish_text_normalize(text):
+    text = text.replace('\n', ' ')
+    text = remove_html_tags(text)
+    text = re.sub("[...]+", ".", text) # Substitute "..." for "."
+    # remove ( and [
+    text = re.sub("[(\[\])]+", "", text)
+    # remove space before punctuation
+    text = re.sub(r'\s([.,;:?!"](?:\s|$))', r'\1', text)
+    # Removing double black spaces
+    text = re.sub("[  ]+", " ", text)
+    # Removing space after hifen
+    text = text.replace(' - ', ' ')
+    text = text.replace('- ', '-')
+    text = text.replace('-\n', '')
+    for word in text.split(' '):
+        for c in word:
+            if c in chars_map.keys():
+                word = word.replace(c,chars_map[c])
+                c = chars_map[c]
+
+    return text.strip()
 
 def create_normalized_text_from_subtitles_file(subtitle_file, output_file, min_words, max_words):
 
@@ -163,7 +185,7 @@ def create_normalized_text_from_subtitles_file(subtitle_file, output_file, min_w
         text = '\n'.join(file.readlines())
         file.close()
     except IOError:
-        print("Error: Reading subtitle file {}.".format(input_file))
+        print("Error: Reading subtitle file {}.".format(subtitle_file))
         return False    
 
     if not text:
