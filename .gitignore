@@ -6,6 +6,18 @@ __pycache__/
 # C extensions
 *.so
 
+# Dataset files
+*.zip
+*.tar.bz
+*.tar.gz
+
+# Dataset folders
+lv_text
+mls_*_opus
+
+# Result Files
+output*
+
 # Distribution / packaging
 .Python
 build/

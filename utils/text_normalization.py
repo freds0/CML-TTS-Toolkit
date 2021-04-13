@@ -141,6 +141,8 @@ def text_normalize(text):
     # Removing double black spaces
     text = re.sub("[  ]+", " ", text)
     # Removing space after hifen
+    text = text.replace(' - ', ' ')
+    text = text.replace('- ', '-')
     text = text.replace('-\n', '')
     for word in text.split(' '):
         for c in word:
@@ -148,7 +150,7 @@ def text_normalize(text):
                 word = word.replace(c,chars_map[c])
                 c = chars_map[c]
 
-    return text
+    return text.strip()
 
 
 def create_normalized_text_from_subtitles_file(subtitle_file, output_file, min_words, max_words):
@@ -184,8 +186,8 @@ def create_normalized_text_from_subtitles_file(subtitle_file, output_file, min_w
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--base_dir', default='./')
-    parser.add_argument('--input_file', default='lv_text/portuguese/10229.txt', help='Subtitles filename (only text)')
-    parser.add_argument('--output_file', default='10229_pre.txt', help='Filename to save the normalize text')
+    parser.add_argument('--input_file', default='lv_text/portuguese/3702.txt', help='Subtitles filename (only text)')
+    parser.add_argument('--output_file', default='3702_pre.txt', help='Filename to save the normalize text')
     parser.add_argument('--min_words', default=10, help='Minimal number of words on sentence')
     parser.add_argument('--max_words', default=30, help='Maximal number of words on sentence')
     args = parser.parse_args()
