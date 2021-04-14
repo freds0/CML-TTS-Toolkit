@@ -1,4 +1,5 @@
 import argparse
+import time
 from os import makedirs
 from os.path import join, isfile, dirname
 import urllib.request
@@ -9,8 +10,7 @@ from utils.utils import remove_mp3_files, get_filepath_from_link
 from utils.download_dataset import download_language_dataset, extract_segment_files
 import collections
 
-
-def get_links(segments_filepath):
+def get_links_dict(segments_filepath):
     '''
     Get the links from segments filepath
     '''
@@ -45,6 +45,11 @@ def download_mp3_files(links_dict, output_dir):
         #print('Download {} / {} file: {}'.format(i, total, mp3_filename))
         # Verify if mp3 file exists
         if not (isfile(mp3_filepath)):
+            # Loop in case of a connection problem.
+            while urllib.request.urlopen(link).getcode() != 200:
+                print('Conection problem...')
+                time.sleep(3)  # Sleep for 3 seconds
+                continue
             try:
                 # Downloading file.
                 urllib.request.urlretrieve(link, mp3_filepath)
@@ -68,9 +73,10 @@ def execute(language, sampling_rate = 22050, audio_format = 'wav', delete_files 
     print('Extracting {} file...'.format(tar_filename))
     segments_files = extract_segment_files(tar_filename)
 
+    # Iterates over [dev, test, train] files
     for segment_filepath in segments_files:
         # Get links from segments file
-        links_dict = get_links(segment_filepath)
+        links_dict = get_links_dict(segment_filepath)
         # Define the output path
         output_dir = join( dirname(segment_filepath), 'audio')
         print('Downloading mp3 files from {}...'.format(segment_filepath))

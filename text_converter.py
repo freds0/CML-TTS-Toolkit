@@ -8,7 +8,6 @@
 #
 import string
 import textdistance
-from tqdm import tqdm
 import re
 
 PUNCTUATION = string.punctuation + '—'
@@ -96,10 +95,10 @@ def compare_word_by_word(substring, complete_string, similarity_metric = 'hammin
     return complete_string[start : j]
 
 
-def find_substring_by_word(substring, complete_text, similarity_metric = 'hamming', start_position = 0):
+def search_substring_by_word(substring, complete_text, similarity_metric ='hamming', start_position = 0):
 
     length_complete_text = len(complete_text)
-    length_substring     = len(substring)
+    length_substring = len(substring)
 
     best_similarity = 0.0
     best_substring_found = False
@@ -179,7 +178,7 @@ def compare_char_by_char(substring, complete_string):
 
     return complete_string[i:j]
 
-def find_substring_by_char(substring, complete_text, start_position = 0):
+def search_substring_by_char(substring, complete_text, start_position = 0):
     length_complete_text = len(complete_text)
     length_substring = len(substring)
 
@@ -211,7 +210,7 @@ def find_substring_by_char(substring, complete_text, start_position = 0):
 
     return best_substring_found, best_similarity, start
 
-def find_substring(substring, complete_text, similarity_metric = 'hamming', start_position = 0):
+def search_substring(substring, complete_text, similarity_metric ='hamming', start_position = 0):
     '''
     Finds the phrase closest to a substring within a complete text, ignoring the punctuation and capital letters.
 
@@ -227,12 +226,12 @@ def find_substring(substring, complete_text, similarity_metric = 'hamming', star
     char_similarity = 0.0
     word_similarity = 0.0
 
-    word_string_result, word_similarity, new_start_position = find_substring_by_word(substring, complete_text, similarity_metric, start_position)
+    word_string_result, word_similarity, new_start_position = search_substring_by_word(substring, complete_text, similarity_metric, start_position)
 
     if word_similarity < 0.99:
         print('Searching by char...')
         start_position = 0
-        char_string_result, char_similarity, new_start_position = find_substring_by_char(substring, complete_text, start_position)
+        char_string_result, char_similarity, new_start_position = search_substring_by_char(substring, complete_text, start_position)
 
     if word_similarity > char_similarity:
         string_result = word_string_result

@@ -7,8 +7,8 @@ from os.path import join
 import time
 from time import process_time
 from utils.download_dataset import  download_language_dataset, download_books_dataset, extract_transcript_files, extract_book_files
-from utils.text_normalization import portuguese_text_normalize, polish_text_normalize
-from text_converter import find_substring
+from utils.text_normalization import customized_text_cleaning
+from text_converter import search_substring
 from utils.custom_tokenizer import infix_re
 from cleantext import clean
 import collections
@@ -20,9 +20,34 @@ abbrev2language = {
     'sp': 'spanish',
     'fr': 'french',
     'du': 'dutch',
-    'ge':'german',
-    'en':'english'
+    'ge': 'german',
+    'en': 'english'
 }
+
+def text_cleaning(text):
+    text = clean(text,
+                      fix_unicode=True,  # fix various unicode errors
+                      to_ascii=False,  # transliterate to closest ASCII representation
+                      lower=False,  # lowercase text
+                      no_line_breaks=True,  # fully strip line breaks as opposed to only normalizing them
+                      no_urls=False,  # replace all URLs with a special token
+                      no_emails=False,  # replace all email addresses with a special token
+                      no_phone_numbers=False,  # replace all phone numbers with a special token
+                      no_numbers=False,  # replace all numbers with a special token
+                      no_digits=False,  # replace all digits with a special token
+                      no_currency_symbols=False,  # replace all currency symbols with a special token
+                      no_punct=False,  # remove punctuations
+                      replace_with_punct="",  # instead of removing punctuations you may replace them
+                      replace_with_url="<URL>",
+                      replace_with_email="<EMAIL>",
+                      replace_with_phone_number="<PHONE>",
+                      replace_with_number="<NUMBER>",
+                      replace_with_digit="0",
+                      replace_with_currency_symbol="<CUR>",
+                      lang="en"  # set to 'de' for German special handling
+                      )
+    text = customized_text_cleaning(text)
+    return text
 
 def get_text_normalization(language_abbrev = 'pt'):
     if language_abbrev == 'pl':
@@ -79,7 +104,7 @@ def executar(args, language_abbrev='pt', sequenced_text=False, similarity_metric
     # Defining Tokenizer
     nlp = get_tokenizer(language_abbrev)
 
-    norm = get_text_normalization(language_abbrev)
+    #norm = get_text_normalization(language_abbrev)
 
     total_similarity = 0.0
     book_id = ''
@@ -107,22 +132,9 @@ def executar(args, language_abbrev='pt', sequenced_text=False, similarity_metric
                 with open(join(books_folder, language, book_id + '.txt')) as f:
                     book_text = f.read()
 
-                # Cleaning complete text
                 #book_text = norm(book_text)
-                book_text = clean(book_text,
-                    fix_unicode=True,  # fix various unicode errors
-                    to_ascii=False,  # transliterate to closest ASCII representation
-                    lower=False,  # lowercase text
-                    no_line_breaks=True,  # fully strip line breaks as opposed to only normalizing them
-                    no_urls=False,  # replace all URLs with a special token
-                    no_emails=False,  # replace all email addresses with a special token
-                    no_phone_numbers=False,  # replace all phone numbers with a special token
-                    no_numbers=False,  # replace all numbers with a special token
-                    no_digits=False,  # replace all digits with a special token
-                    no_currency_symbols=False,  # replace all currency symbols with a special token
-                    no_punct=False,  # remove punctuations
-                    lang="en"
-                )
+                # Cleaning complete text
+                book_text = text_cleaning(book_text)
                 # Tokenizer texts
                 tokens_complete_text = nlp(book_text)
 
@@ -131,12 +143,12 @@ def executar(args, language_abbrev='pt', sequenced_text=False, similarity_metric
             # The search will continue from the last position, defined by start_position.
             if sequenced_text:
                 print('Start position: {}'.format(start_position))
-                text_result, similarity, start_position = find_substring(tokens_piece_text, tokens_complete_text,
-                                                                         similarity_metric, start_position)
+                text_result, similarity, start_position = search_substring(tokens_piece_text, tokens_complete_text,
+                                                                           similarity_metric, start_position)
             # otherwise, the search will start from the beginning of the text, at position zero.
             else:
-                text_result, similarity, start_position = find_substring(tokens_piece_text, tokens_complete_text,
-                                                                         similarity_metric, 0)
+                text_result, similarity, start_position = search_substring(tokens_piece_text, tokens_complete_text,
+                                                                           similarity_metric, 0)
             if not text_result:
                 text_result = ''
 
@@ -161,7 +173,7 @@ def main():
     parser.add_argument('-b', '--base_dir', default='./')
     parser.add_argument('-o', '--output_file', default='./output.csv')
     parser.add_argument('-m', '--metric', default='hamming', help='Two options: hamming or levenshtein')
-    parser.add_argument('-l', '--language', default='pl', help='Options: pt (portuguese), pl (polish), it (italian), sp (spanish), fr (french), du (dutch), ge (german), en (english)')
+    parser.add_argument('-l', '--language', default='pt', help='Options: pt (portuguese), pl (polish), it (italian), sp (spanish), fr (french), du (dutch), ge (german), en (english)')
     parser.add_argument('-s', '--sequenced_text', action='store_true', default=False)
 
     args = parser.parse_args()

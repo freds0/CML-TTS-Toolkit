@@ -8,7 +8,6 @@ import argparse
 import os
 import json
 import urllib.request
-import progressbar
 from pydub import AudioSegment
 from pydub.utils import mediainfo
 from tqdm import tqdm

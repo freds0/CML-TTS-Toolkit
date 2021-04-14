@@ -125,6 +125,18 @@ def remove_html_tags(text):
     clean = re.compile('<.*?>')
     return re.sub(clean, '', text)
 
+def customized_text_cleaning(text):
+    # Remove html tags
+    text = remove_html_tags(text)
+    # Replace "..." with "."
+    text = re.sub("[...]+", ".", text)
+    # Remove (, [, ) and ]
+    text = re.sub("[(\[\])]+", "", text)
+    # Remove space before punctuation
+    text = re.sub(r'\s([.,;:?!"](?:\s|$))', r'\1', text)
+    # Remove special characters
+    text = re.sub(r"[-()\"#/@<>{}`+=~|]", "", text)
+    return text
 
 def portuguese_text_normalize(text):
     text = text.replace('\n', ' ')
