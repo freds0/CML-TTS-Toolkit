@@ -111,8 +111,10 @@ def execute(args, language_abbrev='pt', sequenced_text=False, similarity_metric=
     # Iterates over [dev, test, train] files
     for transcript_file in transcript_files_list:
 
+        output_filename = transcript_file.split('/')[1]
+        output_filename = 'output_' + language + '_' + output_filename + '.csv'
         output_f = open(args.output_file, "w")
-
+        
         with open(transcript_file) as f:
             transcripts_text = f.readlines()
 
@@ -161,10 +163,7 @@ def execute(args, language_abbrev='pt', sequenced_text=False, similarity_metric=
             output_f.write(line)
 
         print('Similaridade Media: {}'.format(total_similarity / len(transcripts_text)))
-
-        # TODO: REMOVER BREAK
-        break
-    output_f.close()
+        output_f.close()
 
 
 def main():
