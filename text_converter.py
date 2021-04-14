@@ -10,10 +10,6 @@ import string
 import textdistance
 from tqdm import tqdm
 import re
-import os
-
-
-
 
 PUNCTUATION = string.punctuation + '—'
 def remove_punctuations(text):
@@ -39,7 +35,7 @@ def preprocess_string(text):
     text = text.replace(" ", "")
     # Remove newlines
     text = re.sub('\n', '', text)
-    return text
+    return text.strip()
 
 
 def compare_word_by_word(substring, complete_string, similarity_metric = 'hamming'):
@@ -185,12 +181,12 @@ def compare_char_by_char(substring, complete_string):
 
 def find_substring_by_char(substring, complete_text, start_position = 0):
     length_complete_text = len(complete_text)
-    length_substring     = len(substring)
+    length_substring = len(substring)
 
-    best_similarity        = 0.0
-    best_substring_found   = False
-    start                  = start_position
-    extra_words            = 10 # it is necessary to add extra words, because the punctuation is also counted.
+    best_similarity = 0.0
+    best_substring_found = False
+    start = start_position
+    extra_words = 10 # it is necessary to add extra words, because the punctuation is also counted.
     # Iterates over the complete text from position zero, increasing the initial position.
     for start in range(start_position, length_complete_text - length_substring):
 
@@ -210,7 +206,7 @@ def find_substring_by_char(substring, complete_text, start_position = 0):
                 best_substring_found = substring_found.text
     
             # Break if it find a phrase with minimal similarity of words. Comment if you desire search for all text
-            if best_similarity > 0.99:
+            if best_similarity >= 0.99:
                 break
 
     return best_substring_found, best_similarity, start
@@ -232,7 +228,6 @@ def find_substring(substring, complete_text, similarity_metric = 'hamming', star
     word_similarity = 0.0
 
     word_string_result, word_similarity, new_start_position = find_substring_by_word(substring, complete_text, similarity_metric, start_position)
-    #string_result, similarity, new_start_position = find_substring_by_word(substring, complete_text, similarity_metric, start_position)
 
     if word_similarity < 0.99:
         print('Searching by char...')

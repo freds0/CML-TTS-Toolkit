@@ -10,6 +10,8 @@ from utils.download_dataset import  download_language_dataset, download_books_da
 from utils.text_normalization import portuguese_text_normalize, polish_text_normalize
 from text_converter import find_substring
 from utils.custom_tokenizer import infix_re
+from cleantext import clean
+import collections
 
 abbrev2language = {
     'pt': 'portuguese',
@@ -40,6 +42,15 @@ def get_tokenizer(language_abbrev = 'pt'):
 
     return nlp
 
+def get_transcripts(transcripts_text):
+    transcripts_dict = {}
+    for line in transcripts_text:
+        filename, text = line.split('\t')
+        transcripts_dict[filename] = text.strip()
+    # Sorting dict by key (filename)
+    ordered_transcripts_dict = collections.OrderedDict(sorted(transcripts_dict.items()))
+    return ordered_transcripts_dict
+
 def executar(args, language_abbrev='pt', sequenced_text=False, similarity_metric='hamming'):
     '''
     Execute convertion pipeline.
@@ -59,6 +70,8 @@ def executar(args, language_abbrev='pt', sequenced_text=False, similarity_metric
     print('Extracting files {}...'.format(books_tar_filename))
     books_folder = extract_book_files(books_tar_filename)
 
+    #transcript_files_list = ['./mls_polish_opus/train/transcripts.txt']
+    #books_folder = './lv_text/'
     language = abbrev2language[language_abbrev]
 
     separator = '|'
@@ -67,7 +80,10 @@ def executar(args, language_abbrev='pt', sequenced_text=False, similarity_metric
     nlp = get_tokenizer(language_abbrev)
 
     norm = get_text_normalization(language_abbrev)
+
     total_similarity = 0.0
+    book_id = ''
+    # Iterates over [dev, test, train] files
     for transcript_file in transcript_files_list:
 
         output_f = open(args.output_file, "w")
@@ -76,19 +92,40 @@ def executar(args, language_abbrev='pt', sequenced_text=False, similarity_metric
             transcripts_text = f.readlines()
 
         start_position = 0
-        for line in tqdm(transcripts_text):
 
-            filename, text = line.split('\t')
+        # Create ordered dict from trascripts list
+        transcripts_dict = get_transcripts(transcripts_text)
+        # Iterates over each transcription
+        for filename, text in tqdm(transcripts_dict.items()):
             print('Processing {}'.format(filename))
 
-            book_id = filename.split('_')[1]
-            with open(join(books_folder, language, book_id + '.txt')) as f:
-                book_text = f.read()
+            new_book_id = filename.split('_')[1]
+            # If it is a new book, updates book_text content
+            if new_book_id != book_id:
+                book_id = new_book_id
 
-            # Cleaning complete text
-            book_text = norm(book_text)
-            # Tokenizer texts
-            tokens_complete_text = nlp(book_text)
+                with open(join(books_folder, language, book_id + '.txt')) as f:
+                    book_text = f.read()
+
+                # Cleaning complete text
+                #book_text = norm(book_text)
+                book_text = clean(book_text,
+                    fix_unicode=True,  # fix various unicode errors
+                    to_ascii=False,  # transliterate to closest ASCII representation
+                    lower=False,  # lowercase text
+                    no_line_breaks=True,  # fully strip line breaks as opposed to only normalizing them
+                    no_urls=False,  # replace all URLs with a special token
+                    no_emails=False,  # replace all email addresses with a special token
+                    no_phone_numbers=False,  # replace all phone numbers with a special token
+                    no_numbers=False,  # replace all numbers with a special token
+                    no_digits=False,  # replace all digits with a special token
+                    no_currency_symbols=False,  # replace all currency symbols with a special token
+                    no_punct=False,  # remove punctuations
+                    lang="en"
+                )
+                # Tokenizer texts
+                tokens_complete_text = nlp(book_text)
+
             tokens_piece_text = nlp(text)
 
             # The search will continue from the last position, defined by start_position.
@@ -113,6 +150,7 @@ def executar(args, language_abbrev='pt', sequenced_text=False, similarity_metric
             output_f.write(line)
 
         print('Similaridade Media: {}'.format(total_similarity / len(transcripts_text)))
+
         # TODO: REMOVER BREAK
         break
     output_f.close()
