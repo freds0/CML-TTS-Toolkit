@@ -9,6 +9,7 @@
 import string
 import textdistance
 import re
+from time import process_time
 
 PUNCTUATION = string.punctuation + '—'
 def remove_punctuations(text):
@@ -51,7 +52,7 @@ def compare_word_by_word(substring, complete_string, similarity_metric = 'hammin
     if similarity_metric == 'levenshtein':
         min_similarity = 0.5 # minimal similarity between the words tested with levenshtein
     else:
-        min_similarity = 0.3 # minimal similarity between the words tested with hamming
+        min_similarity = 0.1 # minimal similarity between the words tested with hamming
 
     i = 0 # substring index iterator
     j = 0 # complete_string index iterator
@@ -130,7 +131,7 @@ def search_substring_by_word(substring, complete_text, similarity_metric ='hammi
 
     return best_substring_found, best_similarity, start_tmp
 
-def compare_char_by_char(substring, complete_string):
+def compare_char_by_char(substring, complete_string, similarity_metric = 'hamming'):
     '''
     Auxiliar fucntion. Checks word by word if a substring is contained in a complete text, ignoring the punctuation and capital letters.
 
@@ -142,10 +143,20 @@ def compare_char_by_char(substring, complete_string):
         String: returns the phrase if it found a similar phrase, otherwise it returns False
     '''
 
-    j = int(0.9 * len(substring))
+    j = len(substring)
   
     min_similarity = 0.5
+    if similarity_metric == 'ratcliff':
+        min_similarity = 0.8
+
     best_similarity = 0.0
+
+    # Ignores punctuation at begining of complete_string
+    for i in range(0, j):
+        if complete_string[i].text in PUNCTUATION:
+            j += 1
+        i += 1
+
 
     while j < len(complete_string):   
 
@@ -158,7 +169,10 @@ def compare_char_by_char(substring, complete_string):
         sentence1 = preprocess_string(substring.text)
         sentence2 = preprocess_string(complete_string[:j].text)
 
-        similarity = textdistance.hamming.normalized_similarity(sentence1, sentence2)
+        if similarity_metric == 'ratcliff':
+            similarity = textdistance.ratcliff_obershelp.normalized_similarity(sentence1, sentence2)
+        else:
+            similarity = textdistance.hamming.normalized_similarity(sentence1, sentence2)
 
         if similarity < min_similarity:
              return False
@@ -178,7 +192,8 @@ def compare_char_by_char(substring, complete_string):
 
     return complete_string[i:j]
 
-def search_substring_by_char(substring, complete_text, start_position = 0):
+def search_substring_by_char(substring, complete_text, similarity_metric = 'hamming', start_position = 0):
+
     length_complete_text = len(complete_text)
     length_substring = len(substring)
 
@@ -186,6 +201,7 @@ def search_substring_by_char(substring, complete_text, start_position = 0):
     best_substring_found = False
     start = start_position
     extra_words = 10 # it is necessary to add extra words, because the punctuation is also counted.
+
     # Iterates over the complete text from position zero, increasing the initial position.
     for start in range(start_position, length_complete_text - length_substring):
 
@@ -193,7 +209,7 @@ def search_substring_by_char(substring, complete_text, start_position = 0):
         complete_text_tmp = complete_text[start : start + length_substring + extra_words]
 
         # Performs the comparison of the two sentences, inserting each word in the complete_text_tmp
-        substring_found = compare_char_by_char(substring, complete_text_tmp)
+        substring_found = compare_char_by_char(substring, complete_text_tmp, similarity_metric)
 
         if substring_found:
             # In this comparison it is better to use levenshtein distance because it has better accuracy.
@@ -231,7 +247,10 @@ def search_substring(substring, complete_text, similarity_metric ='hamming', sta
     if word_similarity < 0.99:
         print('Searching by char...')
         start_position = 0
-        char_string_result, char_similarity, new_start_position = search_substring_by_char(substring, complete_text, start_position)
+        t_start = process_time()
+        char_string_result, char_similarity, new_start_position = search_substring_by_char(substring, complete_text, similarity_metric, start_position)
+        t_stop = process_time()
+        print('Process Time: {}'.format(t_stop - t_start))
 
     if word_similarity > char_similarity:
         string_result = word_string_result

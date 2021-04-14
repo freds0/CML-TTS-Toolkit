@@ -135,7 +135,9 @@ def customized_text_cleaning(text):
     # Remove space before punctuation
     text = re.sub(r'\s([.,;:?!"](?:\s|$))', r'\1', text)
     # Remove special characters
-    text = re.sub(r"[-()\"#/@<>{}`+=~|]", "", text)
+    text = re.sub(r"[-•()\"#/@<>{}`+=~|*^\\/»«]", "", text)
+    # Remove double blank spaces
+    text = re.sub("\s\s+" , " ", text)
     return text
 
 def portuguese_text_normalize(text):

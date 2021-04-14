@@ -7,7 +7,7 @@ from os.path import join
 import time
 from time import process_time
 from utils.download_dataset import  download_language_dataset, download_books_dataset, extract_transcript_files, extract_book_files
-from utils.text_normalization import customized_text_cleaning
+from utils.text_normalization import customized_text_cleaning, portuguese_text_normalize, polish_text_normalize
 from text_converter import search_substring
 from utils.custom_tokenizer import infix_re
 from cleantext import clean
@@ -76,7 +76,7 @@ def get_transcripts(transcripts_text):
     ordered_transcripts_dict = collections.OrderedDict(sorted(transcripts_dict.items()))
     return ordered_transcripts_dict
 
-def executar(args, language_abbrev='pt', sequenced_text=False, similarity_metric='hamming'):
+def execute(args, language_abbrev='pt', sequenced_text=False, similarity_metric='hamming'):
     '''
     Execute convertion pipeline.
     '''
@@ -104,7 +104,7 @@ def executar(args, language_abbrev='pt', sequenced_text=False, similarity_metric
     # Defining Tokenizer
     nlp = get_tokenizer(language_abbrev)
 
-    #norm = get_text_normalization(language_abbrev)
+    norm = get_text_normalization(language_abbrev)
 
     total_similarity = 0.0
     book_id = ''
@@ -157,7 +157,6 @@ def executar(args, language_abbrev='pt', sequenced_text=False, similarity_metric
             print(text_result.strip())
             total_similarity += similarity
             print(similarity)
-
             line = separator.join([filename.strip(), text.strip(), text_result.strip(), str(similarity) + '\n'])
             output_f.write(line)
 
@@ -172,12 +171,12 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('-b', '--base_dir', default='./')
     parser.add_argument('-o', '--output_file', default='./output.csv')
-    parser.add_argument('-m', '--metric', default='hamming', help='Two options: hamming or levenshtein')
+    parser.add_argument('-m', '--metric', default='hamming', help='Options: hamming (low accuracy, low computational cost), levenshtein (high accuracy, high computational cost) or ratcliff (average accuracy, average computational cost)')
     parser.add_argument('-l', '--language', default='pt', help='Options: pt (portuguese), pl (polish), it (italian), sp (spanish), fr (french), du (dutch), ge (german), en (english)')
     parser.add_argument('-s', '--sequenced_text', action='store_true', default=False)
 
     args = parser.parse_args()
-    executar(args, args.language, args.sequenced_text, args.metric)
+    execute(args, args.language, args.sequenced_text, args.metric)
 
 if __name__ == "__main__":
     main()

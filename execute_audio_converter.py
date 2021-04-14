@@ -102,10 +102,10 @@ def execute(language, sampling_rate = 22050, audio_format = 'wav', delete_files 
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument('--language', default='pt', help='Language to download. Choose one: pt: portuguese, pl: polish, it: italian, sp: spanish, fr: french, du: dutch, ge: german, en: english')
-    parser.add_argument('--sampling_rate', default=22050, help='Sample rate of new dataset')
-    parser.add_argument('--audio_format', default='wav', help='wav or flac')
-    parser.add_argument('--delete_files', action='store_true', default=False)
+    parser.add_argument('-l', '--language', default='pt', help='Language to download. Choose one: pt: portuguese, pl: polish, it: italian, sp: spanish, fr: french, du: dutch, ge: german, en: english')
+    parser.add_argument('-s', '--sampling_rate', default=22050, help='Sample rate of new dataset')
+    parser.add_argument('-f', '--audio_format', default='wav', help='wav or flac')
+    parser.add_argument('-d', '--delete_files', action='store_true', default=False)
     args = parser.parse_args()
 
     execute(args.language, args.sampling_rate, args.audio_format, args.delete_files)
