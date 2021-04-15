@@ -102,7 +102,7 @@ def execute(args, language_abbrev='pt', sequenced_text=False, similarity_metric=
     separator = '|'
 
     # Defining Tokenizer
-    nlp = get_tokenizer(language_abbrev)
+    #nlp = get_tokenizer(language_abbrev)
 
     norm = get_text_normalization(language_abbrev)
 
@@ -114,7 +114,7 @@ def execute(args, language_abbrev='pt', sequenced_text=False, similarity_metric=
         output_filename = transcript_file.split('/')[1]
         output_filename = 'output_' + language + '_' + output_filename + '.csv'
         output_f = open(args.output_file, "w")
-        
+
         with open(transcript_file) as f:
             transcripts_text = f.readlines()
 
@@ -138,18 +138,18 @@ def execute(args, language_abbrev='pt', sequenced_text=False, similarity_metric=
                 # Cleaning complete text
                 book_text = text_cleaning(book_text)
                 # Tokenizer texts
-                tokens_complete_text = nlp(book_text)
+                #tokens_complete_text = nlp(book_text)
 
-            tokens_piece_text = nlp(text)
+            #tokens_piece_text = nlp(text)
 
             # The search will continue from the last position, defined by start_position.
             if sequenced_text:
-                print('Start position: {}'.format(start_position))
-                text_result, similarity, start_position = search_substring(tokens_piece_text, tokens_complete_text,
+                print('Start position1: {}'.format(start_position))
+                text_result, similarity, start_position = search_substring(text, book_text,
                                                                            similarity_metric, start_position)
             # otherwise, the search will start from the beginning of the text, at position zero.
             else:
-                text_result, similarity, start_position = search_substring(tokens_piece_text, tokens_complete_text,
+                text_result, similarity, start_position = search_substring(text, book_text,
                                                                            similarity_metric, 0)
             if not text_result:
                 text_result = ''
@@ -164,7 +164,7 @@ def execute(args, language_abbrev='pt', sequenced_text=False, similarity_metric=
 
         print('Similaridade Media: {}'.format(total_similarity / len(transcripts_text)))
         output_f.close()
-
+        break
 
 def main():
     parser = argparse.ArgumentParser()
