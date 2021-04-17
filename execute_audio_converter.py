@@ -43,21 +43,20 @@ def download_mp3_files(links_dict, output_dir):
         mp3_filepath = get_filepath_from_link(link, output_path)
         # Print status
         #print('Download {} / {} file: {}'.format(i, total, mp3_filename))
-        # Verify if mp3 file exists
-        if not (isfile(mp3_filepath)):
-            # Loop in case of a connection problem.
-            while urllib.request.urlopen(link).getcode() != 200:
-                print('Conection problem...')
-                time.sleep(3)  # Sleep for 3 seconds
-                continue
+        # Verify if mp3 file exists]
+
+        if not isfile(mp3_filepath):
+            # if site is down wait
+            while True:
+                try:
+                    if urllib.request.urlopen("http://archive.org/").getcode() == 200:
+                        break
+                except:
+                    time.sleep(10)
             try:
-                # Downloading file.
                 urllib.request.urlretrieve(link, mp3_filepath)
-            except (urllib.error.URLError, urllib.error.HTTPError) as e:
-                print(e)
-                continue
-            except Exception as e:
-                print(e)
+            except:
+                print("Conection problem to acess {}... ".format(link))
                 continue
     return True
 
