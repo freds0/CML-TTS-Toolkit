@@ -8,11 +8,10 @@ import time
 from time import process_time
 from utils.download_dataset import  download_language_dataset, download_books_dataset, extract_transcript_files, extract_book_files
 from utils.text_normalization import customized_text_cleaning, portuguese_text_normalize, polish_text_normalize
-from text_converter import search_substring
 from utils.custom_tokenizer import infix_re
 from cleantext import clean
 import collections
-
+from text_converter import execute_threads_search_substring_by_char, execute_threads_search_substring_by_word
 abbrev2language = {
     'pt': 'portuguese',
     'pl': 'polish',
@@ -76,7 +75,7 @@ def get_transcripts(transcripts_text):
     ordered_transcripts_dict = collections.OrderedDict(sorted(transcripts_dict.items()))
     return ordered_transcripts_dict
 
-def execute(args, language_abbrev='pt', sequenced_text=False, similarity_metric='hamming'):
+def execute(language_abbrev='pt', sequenced_text=False, similarity_metric='hamming', search_type='word', number_threads = 2):
     '''
     Execute convertion pipeline.
     '''
@@ -95,25 +94,19 @@ def execute(args, language_abbrev='pt', sequenced_text=False, similarity_metric=
     print('Extracting files {}...'.format(books_tar_filename))
     books_folder = extract_book_files(books_tar_filename)
 
-    #transcript_files_list = ['./mls_polish_opus/train/transcripts.txt']
-    #books_folder = './lv_text/'
     language = abbrev2language[language_abbrev]
 
     separator = '|'
 
-    # Defining Tokenizer
-    #nlp = get_tokenizer(language_abbrev)
-
-    norm = get_text_normalization(language_abbrev)
-
     total_similarity = 0.0
     book_id = ''
+
     # Iterates over [dev, test, train] files
     for transcript_file in transcript_files_list:
 
         output_filename = transcript_file.split('/')[1]
         output_filename = 'output_' + language + '_' + output_filename + '.csv'
-        output_f = open(args.output_file, "w")
+        output_f = open(output_filename, "w")
 
         with open(transcript_file) as f:
             transcripts_text = f.readlines()
@@ -134,48 +127,43 @@ def execute(args, language_abbrev='pt', sequenced_text=False, similarity_metric=
                 with open(join(books_folder, language, book_id + '.txt')) as f:
                     book_text = f.read()
 
-                #book_text = norm(book_text)
                 # Cleaning complete text
                 book_text = text_cleaning(book_text)
-                # Tokenizer texts
-                #tokens_complete_text = nlp(book_text)
 
-            #tokens_piece_text = nlp(text)
-
-            # The search will continue from the last position, defined by start_position.
-            if sequenced_text:
-                print('Start position1: {}'.format(start_position))
-                text_result, similarity, start_position = search_substring(text, book_text,
-                                                                           similarity_metric, start_position)
-            # otherwise, the search will start from the beginning of the text, at position zero.
+            if search_type == 'char':
+                text_result, similarity, start_position = execute_threads_search_substring_by_char(text, book_text,
+                                                                                                   start_position=0,
+                                                                                                   similarity_metric='hamming',
+                                                                                                   total_threads=int(
+                                                                                                       number_threads))
             else:
-                text_result, similarity, start_position = search_substring(text, book_text,
-                                                                           similarity_metric, 0)
-            if not text_result:
-                text_result = ''
-
+                text_result, similarity, start_position = execute_threads_search_substring_by_word(text, book_text,
+                                                                                                   start_position=0,
+                                                                                                   similarity_metric='hamming',
+                                                                                                   total_threads=int(
+                                                                                                       number_threads))
             # Debug
             print(text.strip())
             print(text_result.strip())
-            total_similarity += similarity
             print(similarity)
+
+            total_similarity += similarity
             line = separator.join([filename.strip(), text.strip(), text_result.strip(), str(similarity) + '\n'])
             output_f.write(line)
 
         print('Similaridade Media: {}'.format(total_similarity / len(transcripts_text)))
         output_f.close()
-        break
 
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('-b', '--base_dir', default='./')
-    parser.add_argument('-o', '--output_file', default='./output.csv')
     parser.add_argument('-m', '--metric', default='hamming', help='Options: hamming (low accuracy, low computational cost), levenshtein (high accuracy, high computational cost) or ratcliff (average accuracy, average computational cost)')
     parser.add_argument('-l', '--language', default='pt', help='Options: pt (portuguese), pl (polish), it (italian), sp (spanish), fr (french), du (dutch), ge (german), en (english)')
+    parser.add_argument('-n', '--number_threads', default=4)
+    parser.add_argument('-t', '--search_type', default='word', help='Options: word or char')
     parser.add_argument('-s', '--sequenced_text', action='store_true', default=False)
-
     args = parser.parse_args()
-    execute(args, args.language, args.sequenced_text, args.metric)
+    execute(args.language, args.sequenced_text, args.metric, args.search_type, args.number_threads)
 
 if __name__ == "__main__":
     main()
