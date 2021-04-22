@@ -2,11 +2,17 @@ from os.path import join, dirname
 from os import remove
 from glob import glob
 
+def get_better_quality_link(link):
+    '''
+    Change the link to try to get a better quality file
+    '''
+    link = link.replace('64', '128')
+    return link
+
 def get_filepath_from_link(link, output_path):
     '''
     Get filename and filepath from link.
     '''
-    link = link.replace('64', '128')
     filename = link.split('/')[-1]
     filepath = join(output_path, filename)
     return filepath

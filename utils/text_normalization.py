@@ -135,7 +135,7 @@ def customized_text_cleaning(text):
     # Remove space before punctuation
     text = re.sub(r'\s([.,;:?!"](?:\s|$))', r'\1', text)
     # Remove special characters
-    text = re.sub(r"[-•()\"#/@<>{}`+=~|*^\\/»«]", "", text)
+    text = re.sub(r"[_•()\"#/@<>{}`+=~|*^\\/»«]", "", text)
     # Remove double blank spaces
     text = re.sub("\s\s+" , " ", text)
     return text

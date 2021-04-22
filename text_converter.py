@@ -95,6 +95,7 @@ def compare_char_by_char(substring, complete_string, similarity_metric='hamming'
 
     best_similarity = 0.0
 
+    '''
     # Ignores punctuation at begining of complete_string
     for i in range(0, len(substring)):
         if complete_string[i].text in PUNCTUATION:
@@ -102,6 +103,7 @@ def compare_char_by_char(substring, complete_string, similarity_metric='hamming'
         i += 1
 
     j -= 1
+    '''
     while j < len(complete_string):
 
         # Ignores punctuation at complete_string
@@ -172,7 +174,7 @@ def search_substring_by_char(threads_result_queue, threads_sentinel, threads_con
                 best_substring_found = substring_found.text
 
             # Break if it find a phrase with great similarity of words.
-            if best_similarity >= 0.98:
+            if best_similarity >= 0.99:
                 new_start = start
                 # Stop other threads
                 threads_content_lock.acquire()
@@ -334,7 +336,7 @@ def search_substring_by_word(threads_result_queue, threads_sentinel, threads_con
             best_substring_found = substring_found.text
 
         # Break if it find a phrase with minimal similarity of words. Comment if you desire search for all text
-        if best_similarity >= 0.98:
+        if best_similarity >= 0.99:
             new_start = start
             # Stop other threads
             threads_content_lock.acquire()

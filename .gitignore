@@ -17,6 +17,7 @@ mls_*_opus
 
 # Result Files
 output*
+input
 
 # Distribution / packaging
 .Python

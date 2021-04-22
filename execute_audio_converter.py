@@ -6,7 +6,7 @@ import urllib.request
 import urllib.error
 from tqdm import tqdm
 from audio_converter import create_audio_files_from_segments_list, create_segments_list
-from utils.utils import remove_mp3_files, get_filepath_from_link
+from utils.utils import remove_mp3_files, get_filepath_from_link, get_better_quality_link
 from utils.download_dataset import download_language_dataset, extract_segment_files
 import collections
 
@@ -23,6 +23,8 @@ def get_links_dict(segments_filepath):
         # Get output folder to download file from link
         speakerid, bookid, fileid = filename.split('_')
         output_folder = join(speakerid, bookid)
+        # Change link 64 to 128
+        link = get_better_quality_link(link)
         # Insert link => output folder at links_dict
         if not link in links_dict.keys():
             links_dict[link] = output_folder
@@ -39,12 +41,10 @@ def download_mp3_files(links_dict, output_dir):
         # Getting complete filepath
         output_path = join(output_dir, folder)
         makedirs(output_path, exist_ok=True)
-        # Change link 64 to 128
         mp3_filepath = get_filepath_from_link(link, output_path)
         # Print status
         #print('Download {} / {} file: {}'.format(i, total, mp3_filename))
         # Verify if mp3 file exists]
-
         if not isfile(mp3_filepath):
             # if site is down wait
             while True:

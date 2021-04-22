@@ -16,7 +16,7 @@ def get_transcripts(transcripts_text):
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('-b', '--base_dir', default='./')
-    parser.add_argument('-i', '--input_file', default='./mls_portuguese_opus/train/transcripts.txt')
+    parser.add_argument('-i', '--input_file', default='./mls_portuguese_opus/dev/transcripts.txt')
     parser.add_argument('-o', '--output_folder', default='./input')
     args = parser.parse_args()
 

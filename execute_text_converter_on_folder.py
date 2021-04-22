@@ -53,7 +53,7 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('-b', '--base_dir', default='./')
     parser.add_argument('-m', '--metric', default='hamming', help='Options: hamming (low accuracy, low computational cost), levenshtein (high accuracy, high computational cost) or ratcliff (average accuracy, average computational cost)')
-    parser.add_argument('-i', '--input_folder', default='./input/train')
+    parser.add_argument('-i', '--input_folder', default='./input/dev')
     parser.add_argument('-c', '--books_folder', default='./lv_text/portuguese/')
     parser.add_argument('-n', '--number_threads', default=4)
     parser.add_argument('-t', '--search_type', default='word', help='Options: word or char')
