@@ -10,7 +10,13 @@ $ conda create -n mls_converter python=3.8 pip
 $ conda activate mls_converter
 ```
 
-Install the requirements:
+
+```
+sudo apt-get update
+sudo apt-get install ffmpeg
+
+```
+Next, install the mls_converter requirements:
 
 ```
 $ pip install -r requirements.txt

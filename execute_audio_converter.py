@@ -9,6 +9,7 @@ from audio_converter import create_audio_files_from_segments_list, create_segmen
 from utils.utils import remove_mp3_files, get_filepath_from_link, get_better_quality_link
 from utils.download_dataset import download_language_dataset, extract_segment_files
 import collections
+from random import randrange
 
 def get_links_dict(segments_filepath):
     '''
@@ -58,6 +59,9 @@ def download_mp3_files(links_dict, output_dir):
             except:
                 print("Conection problem to acess {}... ".format(link))
                 continue
+
+        # Wait to avoid ip blocking
+        time.sleep(randrange(15,30))
     return True
 
 def execute(language, sampling_rate = 22050, audio_format = 'wav', delete_files = False):

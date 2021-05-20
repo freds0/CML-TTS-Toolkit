@@ -1,75 +1,94 @@
 import argparse
 import csv
-import glob
+from glob import glob
+from tqdm import tqdm
 from os.path import join, dirname
 from spacy.lang.pt import Portuguese
 from utils.custom_tokenizer import infix_re
 import textdistance
+import re
+import string
+#from utils.nltk_sntencizer import sentencizer
+#from nltk.tokenize import word_tokenize
 
 nlp = Portuguese()
 nlp.tokenizer.infix_finditer = infix_re.finditer
 
+# Defining what is punctuation
+punctuation = [',', '.', ';', ':', '?', '!', '—']
 
-def find_bigram(bigram, text):
+
+def find_trigram(trigram, text):
 
     best = 0
-    index = False
-    words_list = text.split(' ')
+    i = 0
+    while i < len(text):
+        similarity = textdistance.ratcliff_obershelp.normalized_similarity(trigram, text[i:])
+        if similarity > best:
+            best = similarity
+        else:
+            break
+        i += 1
 
-    for i in range(1, len(words_list)):
-        w0, w1 = bigram
-        lev0 = textdistance.ratcliff_obershelp.normalized_similarity(w0, words_list[i-1])
-        lev1 = textdistance.ratcliff_obershelp.normalized_similarity(w1, words_list[i])
-        if lev0 + lev1 > best:
-            best = lev0 + lev1
-            index = i
+    best = 0
+    j = len(text) - 1
+    while j > 0:
+        similarity = textdistance.ratcliff_obershelp.normalized_similarity(trigram, text[i:j])
+        if similarity > best:
+            best = similarity
+        else:
+            break
+        j -= 1
 
-    return index
+    while j<len(text) and text[j] != ' ':
+        j += 1
+
+    return j
 
 
 def correct_punctuation(text_clean, text_punc):
 
-    punctuation = [',', '.', ';', ':', '?', '!']
-    #text_c = nlp('start1 ' + 'start2 ' + text_clean + ' end')
-    #text_p = nlp('start1 ' + 'start2 ' + text_punc + ' end')
+    # Defining begin and end tokens
+    begin_token = '# # # '
+    end_token = ' *'
+    text_punc = begin_token + text_punc + end_token
+    # Tokeninzing punctuated text.
+    tokens_text_punc = nlp( begin_token + text_punc + end_token)
+    # Tokenizing with nltk
+    #tokens_text_punc = word_tokenize(text_punc)
 
-    text_c = nlp(text_clean)
-    text_p = nlp(text_punc)
-    #corrections = []
+    new_text = begin_token + text_clean + end_token
+    for i in range(3, len(tokens_text_punc)):
+        if tokens_text_punc[i].text in punctuation:
+            # Get the last three tokens before the punctuation
+            trigram = ' '.join([tokens_text_punc[i-j].text.lower() for j in range(3, 0, -1) ] )
+            # Find the position after the trigram
+            trigram_position = find_trigram(trigram, new_text)
+            # Insert punctuation on new_text. Exception: before "—" must be inserted a blank space.
+            punc = tokens_text_punc[i].text if tokens_text_punc[i].text != '—' else  ' ' + tokens_text_punc[i].text
+            new_text = new_text[:trigram_position] + punc + new_text[trigram_position:]
 
-    new_text = text_clean
-    for i in range(2, len(text_p)):
-        if text_p[i].text in punctuation:
-            bigram = (text_p[i-2].text, text_p[i-1].text)
-            index = find_bigram(bigram, text_c.text)
-            #index = new_text.find(text_p[i-2].text +' ' + text_p[i-1].text)
-            new_text = new_text.replace(text_c[index].text, text_c[index].text + text_p[i].text)
-            #print(new_text)
-            #corrections.append( (index, text_p[i].text) )
-    return new_text
+    return new_text[len(begin_token) -1 : - len(end_token)] # Removing begining and ending token
 
-def execute(metadata_file):
+def execute(metadata_file, output_filepath):
     with open(metadata_file) as f:
         content_file = f.readlines()
 
-    filepath = dirname(metadata_file)
-    #output_file = open(join(args.base_dir,output_file), 'w')
+    input_dir = dirname(metadata_file)
+
     separator = '|'
- 
+    out_file = open(output_filepath, 'a')
     for line in content_file:
 
         filename, text_clean, text_punc, lev = line.split('|')
         folder1, folder2, _ = filename.split('_')
-        filepath = join(filepath, folder1, folder2, filename + '.wav')
+        filepath = join(input_dir, folder1, folder2, filename + '.wav')
 
-        new_text = correct_punctuation(text_clean, text_punc)
-        print(text_clean)
-        print(new_text)
-        print(text_punc)
-        line = separator.join([filepath, new_text.strip()])
-        #print(line)
-        #output_file.write(line + '\n')
-    #output_file.close()
+        new_text = correct_punctuation(text_clean.strip(), text_punc.strip())
+        line = separator.join([filepath, new_text.strip(), text_punc.strip()])
+        out_file.write(line + '\n')
+
+    out_file.close()
 
 
 def main():
@@ -79,11 +98,14 @@ def main():
     parser.add_argument('--csv_file', default='output.txt', help='Name of csv file')
     parser.add_argument('--out_file', default='revised.csv', help='Name of csv result ile')      
     args = parser.parse_args()
-    i = 0
-    for metadata in glob.glob(join(args.base_dir, args.input_dir) + '/**/**/' + args.csv_file ):
-        execute(metadata)
-        if i==10:
-            break
-        i+=1
+
+    output_filepath = join(args.base_dir, args.out_file)
+
+    out_file = open(output_filepath, 'w')
+    out_file.close()
+    for metadata in tqdm(glob(join(args.base_dir, args.input_dir) + '/**/**/' + args.csv_file )):
+        execute(metadata, output_filepath)
+
+
 if __name__ == "__main__":
     main()
