@@ -1,4 +1,4 @@
-import os
+from os.path import isfile, isdir, basename, join
 import urllib.request
 import progressbar
 import tarfile
@@ -30,7 +30,7 @@ def download_books_dataset(lang = 'pt'):
 
     books_filename = url.split('/')[-1]
 
-    if os.path.isfile(books_filename):
+    if isfile(books_filename):
         print('File {} exists!'.format(books_filename))
         return books_filename
 
@@ -69,7 +69,7 @@ def download_language_dataset(lang = 'pt'):
         return False
 
     transcripts_filename = url.split('/')[-1]
-    if os.path.isfile(transcripts_filename):
+    if isfile(transcripts_filename):
         print('File {} exists!'.format(transcripts_filename))
 
     else:
@@ -88,10 +88,10 @@ def extract_transcript_files(tar_filename_transcripts):
     '''
 
     # Extract transcripts
-    basename   = os.path.basename(tar_filename_transcripts).split('.')[0]
-    dev_trans_file   = os.path.join(basename, 'dev/transcripts.txt')
-    test_trans_file  = os.path.join(basename, 'test/transcripts.txt')
-    train_trans_file = os.path.join(basename, 'train/transcripts.txt')
+    basefilename = basename(tar_filename_transcripts).split('.')[0]
+    dev_trans_file   = join(basefilename, 'dev/transcripts.txt')
+    test_trans_file  = join(basefilename, 'test/transcripts.txt')
+    train_trans_file = join(basefilename, 'train/transcripts.txt')
 
     transcripts_files = [
         dev_trans_file,
@@ -99,7 +99,7 @@ def extract_transcript_files(tar_filename_transcripts):
         train_trans_file
     ]
 
-    if os.path.isfile(dev_trans_file) and os.path.isfile(test_trans_file) and os.path.isfile(train_trans_file):
+    if isfile(dev_trans_file) and isfile(test_trans_file) and isfile(train_trans_file):
         print('Transcripts already extracted!')
         return transcripts_files
 
@@ -120,11 +120,11 @@ def extract_book_files(tar_filename_books):
     '''
     Extract book files
     '''
-    basename  = os.path.basename(tar_filename_books).split('.')[0]
+    basefilename  = basename(tar_filename_books).split('.')[0]
 
-    if os.path.isdir(basename):
-        print('File {} already extracted!'.format(basename))
-        return basename
+    if isdir(basefilename):
+        print('File {} already extracted!'.format(basefilename))
+        return basefilename
     try:
         tar_file = tarfile.open(tar_filename_books)
         tar_file.extractall()
@@ -139,10 +139,10 @@ def extract_segment_files(tar_filename_segments):
     '''
     Extract segments.txt file from tar.gz
     '''
-    basename   = os.path.basename(tar_filename_segments).split('.')[0]
-    dev_file   = os.path.join(basename, 'dev/segments.txt')
-    test_file  = os.path.join(basename, 'test/segments.txt')
-    train_file = os.path.join(basename, 'train/segments.txt')
+    basefilename   = basename(tar_filename_segments).split('.')[0]
+    dev_file   = join(basefilename, 'dev/segments.txt')
+    test_file  = join(basefilename, 'test/segments.txt')
+    train_file = join(basefilename, 'train/segments.txt')
 
     segments_files = [
         dev_file,
@@ -150,7 +150,7 @@ def extract_segment_files(tar_filename_segments):
         train_file
     ]
 
-    if os.path.isfile(dev_file) and os.path.isfile(test_file) and os.path.isfile(train_file):
+    if isfile(dev_file) and isfile(test_file) and isfile(train_file):
         print('Segments files exists!')
         return segments_files
 

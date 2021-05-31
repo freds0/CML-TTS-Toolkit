@@ -1,13 +1,11 @@
 import argparse
-import csv
 from glob import glob
 from tqdm import tqdm
 from os.path import join, dirname
 from spacy.lang.pt import Portuguese
-from utils.custom_tokenizer import infix_re
+from text_tools.custom_tokenizer import infix_re
 import textdistance
-import re
-import string
+
 #from utils.nltk_sntencizer import sentencizer
 #from nltk.tokenize import word_tokenize
 
@@ -52,7 +50,7 @@ def correct_punctuation(text_clean, text_punc):
     begin_token = '# # # '
     end_token = ' *'
     text_punc = begin_token + text_punc + end_token
-    # Tokeninzing punctuated text.
+    # Tokeninzing punctuated text_tools.
     tokens_text_punc = nlp( begin_token + text_punc + end_token)
     # Tokenizing with nltk
     #tokens_text_punc = word_tokenize(text_punc)

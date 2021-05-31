@@ -1,17 +1,14 @@
 import argparse
-import spacy
 from spacy.lang.pt import Portuguese
 from spacy.lang.pl import Polish
 from tqdm import tqdm
 from os.path import join
-import time
-from time import process_time
 from utils.download_dataset import  download_language_dataset, download_books_dataset, extract_transcript_files, extract_book_files
-from utils.text_normalization import customized_text_cleaning, portuguese_text_normalize, polish_text_normalize
-from utils.custom_tokenizer import infix_re
+from text_tools.text_normalization import customized_text_cleaning, portuguese_text_normalize, polish_text_normalize
+from text_tools.custom_tokenizer import infix_re
 from cleantext import clean
 import collections
-from text_converter import execute_threads_search_substring_by_char, execute_threads_search_substring_by_word
+from text_tools.text_converter import execute_threads_search_substring_by_char, execute_threads_search_substring_by_word
 abbrev2language = {
     'pt': 'portuguese',
     'pl': 'polish',
@@ -27,7 +24,7 @@ def text_cleaning(text):
     text = clean(text,
                       fix_unicode=True,  # fix various unicode errors
                       to_ascii=False,  # transliterate to closest ASCII representation
-                      lower=False,  # lowercase text
+                      lower=False,  # lowercase text_tools
                       no_line_breaks=True,  # fully strip line breaks as opposed to only normalizing them
                       no_urls=False,  # replace all URLs with a special token
                       no_emails=False,  # replace all email addresses with a special token
@@ -127,7 +124,7 @@ def execute(language_abbrev='pt', sequenced_text=False, similarity_metric='hammi
                 with open(join(books_folder, language, book_id + '.txt')) as f:
                     book_text = f.read()
 
-                # Cleaning complete text
+                # Cleaning complete text_tools
                 book_text = text_cleaning(book_text)
 
             if search_type == 'char':
@@ -151,7 +148,7 @@ def execute(language_abbrev='pt', sequenced_text=False, similarity_metric='hammi
             line = separator.join([filename.strip(), text.strip(), text_result.strip(), str(similarity) + '\n'])
             output_f.write(line)
 
-        print('Similaridade Media: {}'.format(total_similarity / len(transcripts_text)))
+        print('Mean Similarity: {}'.format(total_similarity / len(transcripts_text)))
         output_f.close()
 
 def main():

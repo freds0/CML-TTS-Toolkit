@@ -11,14 +11,12 @@ import re
 import tqdm
 import textdistance
 import collections
-import spacy
 from spacy.lang.pt import Portuguese
 import multiprocessing
 from multiprocessing import Process, Queue
 import string
-from utils.custom_tokenizer import infix_re
 from cleantext import clean
-from utils.text_normalization import customized_text_cleaning
+from text_tools.text_normalization import customized_text_cleaning
 from os.path import join
 
 PUNCTUATION = string.punctuation + '—'
@@ -26,20 +24,22 @@ PUNCTUATION = string.punctuation + '—'
 nlp = Portuguese()
 #nlp.tokenizer.infix_finditer = infix_re.finditer
 
+
 def remove_punctuations(text):
     # Remove punctuations
     text = text.translate(str.maketrans("", "", PUNCTUATION)).strip()
     return text
 
+
 def preprocess_string(text):
     '''
-    Auxiliar fucntion. Convert text to lower case, remove the punctuation and spaces. After preprocessing you will have the text as a single string, with no spaces between words.
+    Auxiliar fucntion. Convert text_tools to lower case, remove the punctuation and spaces. After preprocessing you will have the text_tools as a single string, with no spaces between words.
 
         Parameters:
-        text (str): normal text.
+        text_tools (str): normal text_tools.
 
         Returns:
-        String: returns text preprocessed.
+        String: returns text_tools preprocessed.
     '''
     # Convert to lower
     text = text.lower()
@@ -50,11 +50,12 @@ def preprocess_string(text):
     text = re.sub('\n', '', text)
     return text.strip()
 
+
 def text_cleaning(text):
     text = clean(text,
                       fix_unicode=True,  # fix various unicode errors
                       to_ascii=False,  # transliterate to closest ASCII representation
-                      lower=False,  # lowercase text
+                      lower=False,  # lowercase text_tools
                       no_line_breaks=True,  # fully strip line breaks as opposed to only normalizing them
                       no_urls=False,  # replace all URLs with a special token
                       no_emails=False,  # replace all email addresses with a special token
@@ -75,13 +76,14 @@ def text_cleaning(text):
     text = customized_text_cleaning(text)
     return text
 
+
 def compare_char_by_char(substring, complete_string, similarity_metric='hamming'):
     '''
-    Auxiliar fucntion. Checks word by word if a substring is contained in a complete text, ignoring the punctuation and capital letters.
+    Auxiliar fucntion. Checks word by word if a substring is contained in a complete text_tools, ignoring the punctuation and capital letters.
 
         Parameters:
-        substring (str): phrase to be searched for in the complete text.
-        complete_text (str): complete text that has a phrase similar to the substring.
+        substring (str): phrase to be searched for in the complete text_tools.
+        complete_text (str): complete text_tools that has a phrase similar to the substring.
 
         Returns:
         String: returns the phrase if it found a similar phrase, otherwise it returns False
@@ -98,7 +100,7 @@ def compare_char_by_char(substring, complete_string, similarity_metric='hamming'
     '''
     # Ignores punctuation at begining of complete_string
     for i in range(0, len(substring)):
-        if complete_string[i].text in PUNCTUATION:
+        if complete_string[i].text_tools in PUNCTUATION:
             j += 1
         i += 1
 
@@ -155,7 +157,7 @@ def search_substring_by_char(threads_result_queue, threads_sentinel, threads_con
     start = start_position
     extra_words = 10  # it is necessary to add extra words, because the punctuation is also counted.
     new_start = start
-    # Iterates over the complete text from position zero, increasing the initial position.
+    # Iterates over the complete text_tools from position zero, increasing the initial position.
     for start in range(start_position, length_complete_text - length_substring):
 
         # Defines the starting position in which to search for substring
@@ -187,6 +189,7 @@ def search_substring_by_char(threads_result_queue, threads_sentinel, threads_con
                 break
     # Instead of return, put result on thread queue
     threads_result_queue.put((best_substring_found, best_similarity, new_start))
+
 
 def execute_threads_search_substring_by_char(substring, complete_text, start_position = 0, similarity_metric='hamming', total_threads=multiprocessing.cpu_count()):
 
@@ -241,11 +244,11 @@ def execute_threads_search_substring_by_char(substring, complete_text, start_pos
 
 def compare_word_by_word(substring, complete_string, similarity_metric='hamming'):
     '''
-    Auxiliar fucntion. Checks word by word if a substring is contained in a complete text, ignoring the punctuation and capital letters.
+    Auxiliar fucntion. Checks word by word if a substring is contained in a complete text_tools, ignoring the punctuation and capital letters.
 
         Parameters:
-        substring (str): phrase to be searched for in the complete text.
-        complete_text (str): complete text that has a phrase similar to the substring.
+        substring (str): phrase to be searched for in the complete text_tools.
+        complete_text (str): complete text_tools that has a phrase similar to the substring.
 
         Returns:
         String: returns the phrase if it found a similar phrase, otherwise it returns False
@@ -316,7 +319,7 @@ def search_substring_by_word(threads_result_queue, threads_sentinel, threads_con
     best_substring_found = False
     new_start = start_position
 
-    # Iterates over the complete text from position zero, increasing the initial position.
+    # Iterates over the complete text_tools from position zero, increasing the initial position.
     for start in range(start_position, length_complete_text - length_substring):
 
         # Defines the starting position in which to search for substring
@@ -335,7 +338,7 @@ def search_substring_by_word(threads_result_queue, threads_sentinel, threads_con
             best_similarity = similarity
             best_substring_found = substring_found.text
 
-        # Break if it find a phrase with minimal similarity of words. Comment if you desire search for all text
+        # Break if it find a phrase with minimal similarity of words. Comment if you desire search for all text_tools
         if best_similarity >= 0.99:
             new_start = start
             # Stop other threads
@@ -408,6 +411,7 @@ def get_transcripts(transcripts_text):
     ordered_transcripts_dict = collections.OrderedDict(sorted(transcripts_dict.items()))
     return ordered_transcripts_dict
 
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('-b', '--base_dir', default='./')
@@ -432,7 +436,7 @@ def main():
     with open(complete_text_file) as f:
         book_text = f.read()
 
-    # Cleaning complete text
+    # Cleaning complete text_tools
     book_text = text_cleaning(book_text)
 
     start_position = 0

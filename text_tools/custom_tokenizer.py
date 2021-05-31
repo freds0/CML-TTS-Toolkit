@@ -36,5 +36,5 @@ nlp = Portuguese()
 nlp.tokenizer.infix_finditer = infix_re.finditer
 
 doc = nlp("Depois, com as mãos salpicadas de sangue, deixando a rês a arquejar numa poça de sangue, o piedoso homem galgou a colina, correu à cabana, gritou dentro alegre-mente:")
-print([t.text for t in doc]) 
+print([t.text_tools for t in doc]) 
 '''

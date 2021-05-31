@@ -5,13 +5,12 @@
 # Released under GNU Public License (GPL)
 # Adapted from https://gist.github.com/keithito/771cfc1a1ab69d1957914e377e65b6bd from Keith Ito: kito@kito.us
 import argparse
-import os
-import json
-import urllib.request
+from os.path import exists, join
 from pydub import AudioSegment
 from pydub.utils import mediainfo
 from tqdm import tqdm
-from utils.utils import get_filepath_from_link
+from utils.utils import get_filepath_from_link, get_better_quality_link
+
 
 class Segment:
     '''
@@ -42,6 +41,7 @@ class Segment:
     def duration(self, sample_rate):
         return (self.end - self.start - 1) / sample_rate
 
+
 def create_segments_list(segments_filepath, sampling_rate = 22050, audio_format = 'wav', output_dir = './'):
     '''
     Creates a linked segment list from a file.
@@ -56,10 +56,15 @@ def create_segments_list(segments_filepath, sampling_rate = 22050, audio_format 
             filename, link, begin, end = line.strip().split("\t")
             # Get files path
             folder1, folder2, fileid = filename.split('_')
-            output_path = os.path.join(output_dir, folder1, folder2)
+            output_path = join(output_dir, folder1, folder2)
+            # Change link 64 to 128
+            #link = get_better_quality_link(link)
             # Must be like download_mp3_files function
             mp3_filepath = get_filepath_from_link(link, output_path)
-            output_filepath = os.path.join(output_path, filename + extension_file)
+            if not exists(mp3_filepath):
+                continue
+
+            output_filepath = join(output_path, filename + extension_file)
 
             # Verify sample rate
             info = mediainfo(mp3_filepath)
@@ -81,9 +86,10 @@ def create_segments_list(segments_filepath, sampling_rate = 22050, audio_format 
 
     return head, len(content_data)
 
+
 def create_audio_files_from_segments_list(head_list, total_files, sampling_rate = 22050, audio_format = 'wav'):
     '''
-    Creates audio segments from a linked segment list.
+    Creates audio_tools segments from a linked segment list.
     '''
     curr = head_list
     pbar = tqdm(total=total_files)
@@ -102,7 +108,7 @@ def create_audio_files_from_segments_list(head_list, total_files, sampling_rate 
                 audio_segment.export(filepath, format = "flac")
 
         except IOError:
-          print("Error: Writing audio file {} problem.".format(filepath))
+          print("Error: Writing audio_tools file {} problem.".format(filepath))
           return False
         else:
             curr = curr.next
@@ -110,5 +116,3 @@ def create_audio_files_from_segments_list(head_list, total_files, sampling_rate 
 
     pbar.close()
     return True
-
-

@@ -1,7 +1,7 @@
 import re
 import argparse
 import unicodedata
-from utils.number_to_text import number_to_text
+from text_tools.number_to_text import number_to_text
 
 vocab="abcdefghijklmnopqrstuvwxyzçãàáâêéíóôõúû\-0123456789,.;:!?' —"
 vocab = vocab + vocab.upper()
@@ -57,7 +57,7 @@ def tokenize_sentences_on_blank_space(text):
 
 def tokenize_sentences_on_punctuation(text):
     # Tokenize by punctuation
-    #sentences = re.split(r'([.,!?:;])', text)# Result example: ['Esta é uma frase', '.', 'Esta é outra frase', ',']
+    #sentences = re.split(r'([.,!?:;])', text_tools)# Result example: ['Esta é uma frase', '.', 'Esta é outra frase', ',']
     sentences = re.split(r'([.;!?])', text)
     for index, sentence in enumerate(sentences[:-1]):
         sentence = sentence.strip()
@@ -146,7 +146,7 @@ def portuguese_text_normalize(text):
     accents = ('COMBINING ACUTE ACCENT', 'COMBINING GRAVE ACCENT') #portuguese
     chars = [c for c in unicodedata.normalize('NFD', text) if c not in accents]
     text = unicodedata.normalize('NFC', ''.join(chars))# Strip accent
-    #text = text.lower()
+    #text_tools = text_tools.lower()
     text = re.sub("[^{}]".format(vocab), " ", text) # Remove all not in vocab
     text = re.sub("[...]+", ".", text) # Substitute "..." for "."
     # remove ( and [
@@ -191,7 +191,7 @@ def polish_text_normalize(text):
 
 def create_normalized_text_from_subtitles_file(subtitle_file, output_file, min_words, max_words):
 
-    #text = get_text_from_subtitle(subtitle_file)
+    #text_tools = get_text_from_subtitle(subtitle_file)
 
     # read all lines from file
     try:
@@ -212,18 +212,18 @@ def create_normalized_text_from_subtitles_file(subtitle_file, output_file, min_w
         for sentence in sentences:
             sentence = number_to_text(sentence)
             f.write(sentence.strip() + '\n')
-        #f.write(text)
+        #f.write(text_tools)
         f.close()
     except IOError:
-        print("Error: Writing audio file {}.".format(filepath))
+        print("Error: Writing audio_tools file {}.".format(filepath))
         return False
     return True
 
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--base_dir', default='./')
-    parser.add_argument('--input_file', default='lv_text/portuguese/3702.txt', help='Subtitles filename (only text)')
-    parser.add_argument('--output_file', default='3702_pre.txt', help='Filename to save the normalize text')
+    parser.add_argument('--input_file', default='lv_text/portuguese/3702.txt', help='Subtitles filename (only text_tools)')
+    parser.add_argument('--output_file', default='3702_pre.txt', help='Filename to save the normalize text_tools')
     parser.add_argument('--min_words', default=10, help='Minimal number of words on sentence')
     parser.add_argument('--max_words', default=30, help='Maximal number of words on sentence')
     args = parser.parse_args()
