@@ -2,13 +2,16 @@ import argparse
 from glob import glob
 from os.path import join, dirname, isfile
 from tqdm import tqdm
-from text_tools.text_converter import get_transcripts, text_cleaning, execute_threads_search_substring_by_char, execute_threads_search_substring_by_word
+from text_tools.search_substring_with_threads import get_transcripts, text_cleaning, execute_threads_search_substring_by_char, execute_threads_search_substring_by_word
 from text_tools.create_structure_folders import change_structure_folders
 from utils.download_dataset import  download_language_dataset, download_books_dataset, extract_transcript_files, extract_book_files
 from utils.utils import abbrev2language
 
 
-def execute_first_convertion(language_abbrev, transcript_file, complete_text_file, search_type, output_file, number_threads):
+def search_substring_with_punctuation(language_abbrev, transcript_file, complete_text_file, search_type, output_file, number_threads):
+    '''
+    Perform substring search for each substring of file transcript_file in a file complete_text_file
+    '''
 
     with open(transcript_file) as f:
         transcripts_text = f.readlines()
@@ -25,7 +28,7 @@ def execute_first_convertion(language_abbrev, transcript_file, complete_text_fil
     separator = '|'
     total_similarity = 0
 
-    # Create ordered dict from trascripts list
+    # Create ordered dict from transcripts list
     transcripts_dict = get_transcripts(transcripts_text)
 
     # Iterates over each transcription
@@ -41,10 +44,11 @@ def execute_first_convertion(language_abbrev, transcript_file, complete_text_fil
             text_result = ''
         total_similarity += similarity
 
-        # Debug
+        # Some information
         print(text.strip())
         print(text_result.strip())
         print(similarity)
+        # Write to file
         line = separator.join([filename.strip(), text.strip(), text_result.strip(), str(similarity) + '\n'])
         output_f.write(line)
 
@@ -52,7 +56,10 @@ def execute_first_convertion(language_abbrev, transcript_file, complete_text_fil
     output_f.close()
 
 
-def continue_convertion(language_abbrev, transcript_file, complete_text_file, search_type, output_file, number_threads):
+def keep_searching_substring_with_punctuation(language_abbrev, transcript_file, complete_text_file, search_type, output_file, number_threads):
+    '''
+    Perform substring search only for files with low similarity.
+    '''
 
     with open(transcript_file) as f:
         transcripts_text = f.readlines()
@@ -89,10 +96,11 @@ def continue_convertion(language_abbrev, transcript_file, complete_text_file, se
             text_result = ''
         total_similarity += similarity
 
-        # Debug
+        # Some information
         print(text.strip())
         print(text_result.strip())
         print(similarity)
+        # Write to file
         line = separator.join([filename.strip(), text.strip(), text_result.strip(), str(similarity) + '\n'])
         output_f.write(line)
 
@@ -101,7 +109,7 @@ def continue_convertion(language_abbrev, transcript_file, complete_text_file, se
     output_f.close()
 
 
-def execution_convertion_pipeline(language_abbrev, input_folder, books_folder, search_type, threads_number):
+def execution_text_convertion_pipeline(language_abbrev, input_folder, books_folder, search_type, threads_number):
 
     language = abbrev2language[language_abbrev]
     print('Downloading {} dataset tar.gz file...'.format(language_abbrev))
@@ -118,19 +126,21 @@ def execution_convertion_pipeline(language_abbrev, input_folder, books_folder, s
     print('Extracting files {}...'.format(books_tar_filename))
     books_folder = extract_book_files(books_tar_filename)
 
+    # Run folder restructuring
     for transcript_file in transcript_files_list:
         print('Executing {} file'.format(transcript_file))
         output_folder = dirname(transcript_file)
-        #  Folders reestructuring
         change_structure_folders(transcript_file, output_folder)
 
+    # Run substring search in books
     for transcript_file in glob(output_folder + '/**/**/transcripts.txt'):
-        print(transcript_file)
+        # Defining output filepath
+        output_filepath = join(dirname(transcript_file), 'output_search.txt')
+        # Defining text book filepath
         book_file = transcript_file.split('/')[-2]
-        output_filepath = join(dirname(transcript_file), 'output.txt')
         complete_text_file = join(books_folder, language, book_file + '.txt')
 
-        # Verify if folder was already converted
+        # Verify if search was already done
         if isfile(output_filepath):
             with open(output_filepath) as f:
                 content_output = f.readlines()
@@ -139,10 +149,15 @@ def execution_convertion_pipeline(language_abbrev, input_folder, books_folder, s
                 content_input = f.readlines()
 
             if len(content_output) == len(content_input):
-                continue_convertion(language_abbrev, output_filepath, complete_text_file, search_type, output_filepath, int(threads_number))
-        else:
-            execute_first_convertion(language_abbrev, transcript_file, complete_text_file, search_type, output_filepath, int(threads_number))
+                # Perform substring search only for files with low similarity
+                keep_searching_substring_with_punctuation(language_abbrev, output_filepath, complete_text_file, search_type, output_filepath, int(threads_number))
+                continue
+        # First execution of search
+        search_substring_with_punctuation(language_abbrev, transcript_file, complete_text_file, search_type, output_filepath, int(threads_number))
 
+    # Insert punctuation of the found substring in the transcript text
+    for metadata_search in tqdm(glob(output_folder + '/**/**/output_search.txt' )):
+        insert_punctuation_on_substring(metadata_search, output_filepath)
 
 def main():
     parser = argparse.ArgumentParser()
@@ -161,7 +176,7 @@ def main():
     input_folder = join(args.base_dir, args.input_folder)
     books_folder = join(args.base_dir, args.books_folder)
 
-    execution_convertion_pipeline(args.language, input_folder, books_folder, args.search_type, args.threads_number)
+    execution_text_convertion_pipeline(args.language, input_folder, books_folder, args.search_type, args.threads_number)
 
 
 if __name__ == "__main__":

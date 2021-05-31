@@ -1,4 +1,4 @@
-from utils.utils import get_filepath_from_link
+from utils.utils import get_filepath_from_link, get_better_quality_link
 import urllib.request
 import urllib.error
 from os.path import join, isfile
@@ -9,7 +9,7 @@ import collections
 import time
 
 
-def get_links_dict(segments_filepath):
+def get_links_dict(segments_filepath, audio_quality):
     '''
     Get the links from segments filepath
     '''
@@ -22,8 +22,9 @@ def get_links_dict(segments_filepath):
         # Get output folder to download file from link
         speakerid, bookid, fileid = filename.split('_')
         output_folder = join(speakerid, bookid)
-        # Change link 64 to 128
-        #link = get_better_quality_link(link)
+        if audio_quality == 128:
+            # Change link 64 to 128
+            link = get_better_quality_link(link)
         # Insert link => output folder at links_dict
         if not link in links_dict.keys():
             links_dict[link] = output_folder
@@ -33,7 +34,7 @@ def get_links_dict(segments_filepath):
     return ordered_links_dict
 
 
-def download_mp3_from_dict(links_dict, output_dir):
+def download_mp3_from_dict(links_dict, audio_quality, output_dir):
     '''
     Given a list of links, downloads mp3 files at 64kbs.
     '''
@@ -41,6 +42,11 @@ def download_mp3_from_dict(links_dict, output_dir):
         # Getting complete filepath
         output_path = join(output_dir, folder)
         makedirs(output_path, exist_ok=True)
+        # Defining audio quality on link
+        if int(audio_quality) == 128:
+            # Change link 64 to 128
+            link = get_better_quality_link(link)
+
         mp3_filepath = get_filepath_from_link(link, output_path)
         # Print status
         #print('Download {} / {} file: {}'.format(i, total, mp3_filename))

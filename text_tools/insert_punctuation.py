@@ -68,7 +68,7 @@ def correct_punctuation(text_clean, text_punc):
 
     return new_text[len(begin_token) -1 : - len(end_token)] # Removing begining and ending token
 
-def execute(metadata_file, output_filepath):
+def insert_punctuation_on_substring(metadata_file, output_filepath):
     with open(metadata_file) as f:
         content_file = f.readlines()
 
@@ -92,9 +92,9 @@ def execute(metadata_file, output_filepath):
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--base_dir', default='./')
-    parser.add_argument('--input_dir', default='./input/train')
-    parser.add_argument('--csv_file', default='output.txt', help='Name of csv file')
-    parser.add_argument('--out_file', default='revised.csv', help='Name of csv result ile')      
+    parser.add_argument('--input_dir', default='mls_portuguese_opus')
+    parser.add_argument('--csv_file', default='output_search.txt', help='Name of csv file')
+    parser.add_argument('--out_file', default='output_revised.csv', help='Name of csv result ile')
     args = parser.parse_args()
 
     output_filepath = join(args.base_dir, args.out_file)
@@ -102,7 +102,7 @@ def main():
     out_file = open(output_filepath, 'w')
     out_file.close()
     for metadata in tqdm(glob(join(args.base_dir, args.input_dir) + '/**/**/' + args.csv_file )):
-        execute(metadata, output_filepath)
+        insert_punctuation_on_substring(metadata, output_filepath)
 
 
 if __name__ == "__main__":

@@ -42,7 +42,7 @@ class Segment:
         return (self.end - self.start - 1) / sample_rate
 
 
-def create_segments_list(segments_filepath, sampling_rate = 22050, audio_format = 'wav', output_dir = './'):
+def create_segments_list(segments_filepath, sampling_rate = 22050, audio_format = 'wav', audio_quality = 64, output_dir = './'):
     '''
     Creates a linked segment list from a file.
     '''
@@ -57,8 +57,9 @@ def create_segments_list(segments_filepath, sampling_rate = 22050, audio_format 
             # Get files path
             folder1, folder2, fileid = filename.split('_')
             output_path = join(output_dir, folder1, folder2)
-            # Change link 64 to 128
-            #link = get_better_quality_link(link)
+            if audio_quality == 128:
+                # Change link 64 to 128
+                link = get_better_quality_link(link)
             # Must be like download_mp3_files function
             mp3_filepath = get_filepath_from_link(link, output_path)
             if not exists(mp3_filepath):

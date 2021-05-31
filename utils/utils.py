@@ -20,6 +20,7 @@ def get_better_quality_link(link):
     link = link.replace('64', '128')
     return link
 
+
 def get_filepath_from_link(link, output_path):
     '''
     Get filename and filepath from link.
@@ -28,10 +29,11 @@ def get_filepath_from_link(link, output_path):
     filepath = join(output_path, filename)
     return filepath
 
+
 def remove_mp3_files(segment_filepath):
     '''
     Remove mp3 files.
     '''
-    mp3_filelist = glob(dirname(segment_filepath) + '/audio_tools/**/**/*.mp3')
+    mp3_filelist = glob(dirname(segment_filepath) + '/**/**/*.mp3')
     for mp3_file in mp3_filelist:
         remove(mp3_file)

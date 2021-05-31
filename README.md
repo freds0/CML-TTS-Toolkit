@@ -2,6 +2,8 @@
 
 Set of tools to convert the MLS dataset. 
 
+![mls_conversion_tools_process](imgs/mls_convertion_tools_process.png)
+
 ## Install
 
 Create a conda env:

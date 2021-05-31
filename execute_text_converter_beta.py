@@ -8,7 +8,8 @@ from text_tools.text_normalization import customized_text_cleaning, portuguese_t
 from text_tools.custom_tokenizer import infix_re
 from cleantext import clean
 import collections
-from text_tools.text_converter import execute_threads_search_substring_by_char, execute_threads_search_substring_by_word
+from text_tools.search_substring_with_threads import execute_threads_search_substring_by_char, execute_threads_search_substring_by_word
+
 abbrev2language = {
     'pt': 'portuguese',
     'pl': 'polish',
@@ -71,6 +72,7 @@ def get_transcripts(transcripts_text):
     # Sorting dict by key (filename)
     ordered_transcripts_dict = collections.OrderedDict(sorted(transcripts_dict.items()))
     return ordered_transcripts_dict
+
 
 def execute(language_abbrev='pt', sequenced_text=False, similarity_metric='hamming', search_type='word', number_threads = 2):
     '''
