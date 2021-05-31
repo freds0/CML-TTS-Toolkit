@@ -23,7 +23,7 @@ def execution_audio_convertion_pipeline(language, sampling_rate = 22050, audio_f
         # Get links from segments file
         links_dict = get_links_dict(segment_filepath, audio_quality)
         # Define the output path
-        output_dir = join( dirname(segment_filepath), 'audio_tools')
+        output_dir = join( dirname(segment_filepath), 'audio')
         print('Downloading mp3 files from {}...'.format(segment_filepath))
         # Download mp3 files from links_dict
         r = download_mp3_from_dict(links_dict, audio_quality, output_dir)
@@ -51,7 +51,7 @@ def main():
     parser.add_argument('-s', '--sampling_rate', default=22050, help='Sample rate of new dataset')
     parser.add_argument('-f', '--audio_format', default='wav', help='wav or flac')
     parser.add_argument('-d', '--delete_files', action='store_true', default=False)
-    parser.add_argument('-q', '--audio_quality', default=64, help='64 or 128')
+    parser.add_argument('-q', '--audio_quality', default=64, help='64 if sr=22050 or 128 if sr=44100')
     args = parser.parse_args()
 
     execution_audio_convertion_pipeline(args.language, int(args.sampling_rate), args.audio_format, int(args.audio_quality), args.delete_files)

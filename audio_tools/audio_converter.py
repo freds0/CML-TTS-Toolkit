@@ -90,7 +90,7 @@ def create_segments_list(segments_filepath, sampling_rate = 22050, audio_format 
 
 def create_audio_files_from_segments_list(head_list, total_files, sampling_rate = 22050, audio_format = 'wav'):
     '''
-    Creates audio_tools segments from a linked segment list.
+    Creates audio segments from a linked segment list.
     '''
     curr = head_list
     pbar = tqdm(total=total_files)
@@ -109,7 +109,7 @@ def create_audio_files_from_segments_list(head_list, total_files, sampling_rate 
                 audio_segment.export(filepath, format = "flac")
 
         except IOError:
-          print("Error: Writing audio_tools file {} problem.".format(filepath))
+          print("Error: Writing audio file {} problem.".format(filepath))
           return False
         else:
             curr = curr.next
