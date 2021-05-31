@@ -7,7 +7,8 @@ from text_tools.create_structure_folders import change_structure_folders
 from utils.download_dataset import  download_language_dataset, download_books_dataset, extract_transcript_files, extract_book_files
 from utils.utils import abbrev2language
 
-def execute_first_convertion(transcript_file, complete_text_file, search_type, output_file, number_threads):
+
+def execute_first_convertion(language_abbrev, transcript_file, complete_text_file, search_type, output_file, number_threads):
 
     with open(transcript_file) as f:
         transcripts_text = f.readlines()
@@ -32,9 +33,9 @@ def execute_first_convertion(transcript_file, complete_text_file, search_type, o
         print('Processing {}'.format(filename))
 
         if search_type == 'char':
-            text_result, similarity, start_position = execute_threads_search_substring_by_char(text, book_text, start_position=0, similarity_metric='hamming', total_threads=int(number_threads))
+            text_result, similarity, start_position = execute_threads_search_substring_by_char(language_abbrev, text, book_text, start_position=0, similarity_metric='hamming', total_threads=int(number_threads))
         else:
-            text_result, similarity, start_position = execute_threads_search_substring_by_word(text, book_text, start_position=0, similarity_metric='hamming', total_threads=int(number_threads))
+            text_result, similarity, start_position = execute_threads_search_substring_by_word(language_abbrev, text, book_text, start_position=0, similarity_metric='hamming', total_threads=int(number_threads))
 
         if not text_result:
             text_result = ''
@@ -51,7 +52,7 @@ def execute_first_convertion(transcript_file, complete_text_file, search_type, o
     output_f.close()
 
 
-def continue_convertion(transcript_file, complete_text_file, search_type, output_file, number_threads):
+def continue_convertion(language_abbrev, transcript_file, complete_text_file, search_type, output_file, number_threads):
 
     with open(transcript_file) as f:
         transcripts_text = f.readlines()
@@ -80,9 +81,9 @@ def continue_convertion(transcript_file, complete_text_file, search_type, output
         print('Processing {}'.format(filename))
 
         if search_type == 'char':
-            text_result, similarity, start_position = execute_threads_search_substring_by_char(text, book_text, start_position=0, similarity_metric='hamming', total_threads=int(number_threads))
+            text_result, similarity, start_position = execute_threads_search_substring_by_char(language_abbrev, text, book_text, start_position=0, similarity_metric='hamming', total_threads=int(number_threads))
         else:
-            text_result, similarity, start_position = execute_threads_search_substring_by_word(text, book_text, start_position=0, similarity_metric='hamming', total_threads=int(number_threads))
+            text_result, similarity, start_position = execute_threads_search_substring_by_word(language_abbrev, text, book_text, start_position=0, similarity_metric='hamming', total_threads=int(number_threads))
 
         if not text_result:
             text_result = ''
@@ -138,9 +139,9 @@ def execution_convertion_pipeline(language_abbrev, input_folder, books_folder, s
                 content_input = f.readlines()
 
             if len(content_output) == len(content_input):
-                continue_convertion(output_filepath, complete_text_file, search_type, output_filepath, int(threads_number))
+                continue_convertion(language_abbrev, output_filepath, complete_text_file, search_type, output_filepath, int(threads_number))
         else:
-            execute_first_convertion(transcript_file, complete_text_file, search_type, output_filepath, int(threads_number))
+            execute_first_convertion(language_abbrev, transcript_file, complete_text_file, search_type, output_filepath, int(threads_number))
 
 
 def main():

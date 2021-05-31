@@ -22,14 +22,24 @@ Next, install the mls_converter requirements:
 $ pip install -r requirements.txt
 ```
 
-For portuguese, install spacy:
+For an specific language, install Spacy:
 
 ```
-python3 -m spacy download pt_core_news_md
-```
-
-For english:
-```
+# Portuguese
+$ python3 -m spacy download pt_core_news_md
+# Polish
+$ python3 -m spacy download pl_core_news_sm
+# Italian
+$ python3 -m spacy download it_core_news_sm
+# Spanish
+$ python3 -m spacy download es_core_news_sm
+# French
+$ python3 -m spacy download fr_core_news_sm
+# Dutch
+$ python3 -m spacy download nl_core_news_sm
+# German
+$ python3 -m spacy download de_core_news_sm
+# English
 $ python3 -m spacy download en_core_web_sm
 ```
 

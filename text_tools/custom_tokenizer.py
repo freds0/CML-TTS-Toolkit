@@ -7,8 +7,8 @@
 # email fred.santos.oliveira@gmail.com
 #
 # Source: https://spacy.io/usage/linguistic-features#how-tokenizer-works
-import spacy
-from spacy.lang.pt import Portuguese
+#import spacy
+#from spacy.lang.pt import Portuguese
 from spacy.lang.char_classes import ALPHA, ALPHA_LOWER, ALPHA_UPPER
 from spacy.lang.char_classes import CONCAT_QUOTES, LIST_ELLIPSES, LIST_ICONS
 from spacy.util import compile_infix_regex

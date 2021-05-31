@@ -11,17 +11,17 @@ import re
 import tqdm
 import textdistance
 import collections
-from spacy.lang.pt import Portuguese
 import multiprocessing
 from multiprocessing import Process, Queue
 import string
 from cleantext import clean
 from text_tools.text_normalization import customized_text_cleaning
+from text_tools.language_tokenizer import get_language_tokenizer
 from os.path import join
 
 PUNCTUATION = string.punctuation + '—'
 
-nlp = Portuguese()
+#nlp = Portuguese()
 #nlp.tokenizer.infix_finditer = infix_re.finditer
 
 
@@ -144,8 +144,10 @@ def compare_char_by_char(substring, complete_string, similarity_metric='hamming'
     return complete_string[i:j]
 
 
-def search_substring_by_char(threads_result_queue, threads_sentinel, threads_content_lock, substring, complete_text, similarity_metric='hamming', start_position=0):
+def search_substring_by_char(threads_result_queue, threads_sentinel, threads_content_lock, language_abbrev, substring, complete_text, similarity_metric='hamming', start_position=0):
+
     print('Searching by char...')
+    nlp = get_language_tokenizer(language_abbrev)
     substring = nlp(substring)
     complete_text = nlp(complete_text)
 
@@ -191,7 +193,7 @@ def search_substring_by_char(threads_result_queue, threads_sentinel, threads_con
     threads_result_queue.put((best_substring_found, best_similarity, new_start))
 
 
-def execute_threads_search_substring_by_char(substring, complete_text, start_position = 0, similarity_metric='hamming', total_threads=multiprocessing.cpu_count()):
+def execute_threads_search_substring_by_char(language_abbrev, substring, complete_text, start_position = 0, similarity_metric='hamming', total_threads=multiprocessing.cpu_count()):
 
     security_margin = 100
     complete_text_list = []
@@ -216,7 +218,7 @@ def execute_threads_search_substring_by_char(substring, complete_text, start_pos
     process_list = []
     for i in range(total_threads):
         p = Process(target=search_substring_by_char,
-                    args=(threads_result_queue, threads_sentinel, threads_content_lock, substring, complete_text_list[i], similarity_metric, start_position))
+                    args=(threads_result_queue, threads_sentinel, threads_content_lock, language_abbrev, substring, complete_text_list[i], similarity_metric, start_position))
         process_list.append(p)
 
     # Threads starting
@@ -307,8 +309,10 @@ def compare_word_by_word(substring, complete_string, similarity_metric='hamming'
     return complete_string[start: j]
 
 
-def search_substring_by_word(threads_result_queue, threads_sentinel, threads_content_lock, substring, complete_text, similarity_metric='hamming', start_position=0):
+def search_substring_by_word(threads_result_queue, threads_sentinel, threads_content_lock, language_abbrev, substring, complete_text, similarity_metric='hamming', start_position=0):
+
     print('Searching by word...')
+    nlp = get_language_tokenizer(language_abbrev)
     substring = nlp(substring)
     complete_text = nlp(complete_text)
 
@@ -351,7 +355,7 @@ def search_substring_by_word(threads_result_queue, threads_sentinel, threads_con
     threads_result_queue.put((best_substring_found, best_similarity, new_start))
 
 
-def execute_threads_search_substring_by_word(substring, complete_text, start_position = 0, similarity_metric='hamming', total_threads=multiprocessing.cpu_count()):
+def execute_threads_search_substring_by_word(language_abbrev, substring, complete_text, start_position = 0, similarity_metric='hamming', total_threads=multiprocessing.cpu_count()):
 
     security_margin = 100
     complete_text_list = []
@@ -376,7 +380,7 @@ def execute_threads_search_substring_by_word(substring, complete_text, start_pos
     process_list = []
     for i in range(total_threads):
         p = Process(target=search_substring_by_word,
-                    args=(threads_result_queue, threads_sentinel, threads_content_lock, substring, complete_text_list[i], similarity_metric, start_position))
+                    args=(threads_result_queue, threads_sentinel, threads_content_lock, language_abbrev, substring, complete_text_list[i], similarity_metric, start_position))
         process_list.append(p)
 
     # Threads starting
