@@ -6,7 +6,7 @@ from utils.utils import remove_mp3_files
 from utils.download_dataset import download_language_dataset, extract_segment_files
 
 
-def execution_audio_convertion_pipeline(language, sampling_rate = 22050, audio_format ='wav', audio_quality = 64, delete_files = False):
+def execution_audio_convertion_pipeline(language, sampling_rate=22050, audio_format='wav', audio_quality=64, delete_files=False, force_download=False, force_write=False):
     '''
     Execute convertion pipeline.
     '''
@@ -26,35 +26,37 @@ def execution_audio_convertion_pipeline(language, sampling_rate = 22050, audio_f
         output_dir = join( dirname(segment_filepath), 'audio')
         print('Downloading mp3 files from {}...'.format(segment_filepath))
         # Download mp3 files from links_dict
-        r = download_mp3_from_dict(links_dict, audio_quality, output_dir)
+        r = download_mp3_from_dict(links_dict, audio_quality, output_dir, force_download)
         if not r:
-            print('Erro downloading files.')
+            print('Error downloading files.')
             return False
 
         print('Creating segments list...')
         segments_list, total_files = create_segments_list(segment_filepath, sampling_rate, audio_format, audio_quality, output_dir)
 
         print('Creating audio segments...')
-        if not create_audio_files_from_segments_list(segments_list, total_files, sampling_rate, audio_format):
+        if not create_audio_files_from_segments_list(segments_list, total_files, sampling_rate, audio_format, force_write):
             return False
 
         if delete_files:
             remove_mp3_files(segment_filepath)
 
-    print("Finished audio convertion.")
+    print("Finished audio conversion.")
     return True
 
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument('-l', '--language', default='pt', help='Language to download. Choose one: pt: portuguese, pl: polish, it: italian, sp: spanish, fr: french, du: dutch, ge: german, en: english')
+    parser.add_argument('-l', '--language', default='pt', help='Language to download. pt: portuguese, pl: polish, it: italian, sp: spanish, fr: french, du: dutch, ge: german, en: english')
     parser.add_argument('-s', '--sampling_rate', default=22050, help='Sample rate of new dataset')
     parser.add_argument('-f', '--audio_format', default='wav', help='wav or flac')
+    parser.add_argument('-n', '--force_download', action='store_true', default=False)
+    parser.add_argument('-w', '--force_write', action='store_true', default=False)
     parser.add_argument('-d', '--delete_files', action='store_true', default=False)
     parser.add_argument('-q', '--audio_quality', default=64, help='64 if sr=22050 or 128 if sr=44100')
     args = parser.parse_args()
 
-    execution_audio_convertion_pipeline(args.language, int(args.sampling_rate), args.audio_format, int(args.audio_quality), args.delete_files)
+    execution_audio_convertion_pipeline(args.language, int(args.sampling_rate), args.audio_format, int(args.audio_quality), args.delete_files, args.force_download, args.force_write)
 
 if __name__ == "__main__":
     main()

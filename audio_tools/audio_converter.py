@@ -57,13 +57,22 @@ def create_segments_list(segments_filepath, sampling_rate = 22050, audio_format 
             # Get files path
             folder1, folder2, fileid = filename.split('_')
             output_path = join(output_dir, folder1, folder2)
-            if audio_quality == 128:
+
+            link128 = get_better_quality_link(link)
+            if int(audio_quality) == 128:
                 # Change link 64 to 128
-                link = get_better_quality_link(link)
-            # Must be like download_mp3_files function
-            mp3_filepath = get_filepath_from_link(link, output_path)
-            if not exists(mp3_filepath):
-                continue
+                link = link128
+
+            # Verify if a better quality 128 mp3 file exists
+            mp3_filepath128 = get_filepath_from_link(link128, output_path)
+            if not exists(mp3_filepath128) and int(audio_quality) == 64:
+                # Verify if 64 mp3 exists
+                mp3_filepath = get_filepath_from_link(link, output_path)
+                if not exists(mp3_filepath):
+                    continue
+            else:
+                # Uses 128 mp3 file
+                mp3_filepath = mp3_filepath128
 
             output_filepath = join(output_path, filename + extension_file)
 
@@ -88,7 +97,7 @@ def create_segments_list(segments_filepath, sampling_rate = 22050, audio_format 
     return head, len(content_data)
 
 
-def create_audio_files_from_segments_list(head_list, total_files, sampling_rate = 22050, audio_format = 'wav'):
+def create_audio_files_from_segments_list(head_list, total_files, sampling_rate=22050, audio_format='wav', force_write=False):
     '''
     Creates audio segments from a linked segment list.
     '''
@@ -104,12 +113,18 @@ def create_audio_files_from_segments_list(head_list, total_files, sampling_rate 
         #print("Exporting {}".format(filepath))
         try:
             if audio_format == 'wav':
-                audio_segment.export(filepath, format = "wav")
+                if not exists(filepath) or force_write:
+                    audio_segment.export(filepath, format = "wav")
+                else:
+                    print('Segment {} already exists!'.format(filepath))
             else:
-                audio_segment.export(filepath, format = "flac")
+                if not exists(filepath) or force_write:
+                    audio_segment.export(filepath, format = "flac")
+                else:
+                    print('Segment {} already exists!'.format(filepath))
 
         except IOError:
-          print("Error: Writing audio file {} problem.".format(filepath))
+          print("Error: Writing audio segment {} problem.".format(filepath))
           return False
         else:
             curr = curr.next

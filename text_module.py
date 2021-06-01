@@ -4,6 +4,7 @@ from os.path import join, dirname, isfile
 from tqdm import tqdm
 from text_tools.search_substring_with_threads import get_transcripts, text_cleaning, execute_threads_search_substring_by_char, execute_threads_search_substring_by_word
 from text_tools.create_structure_folders import change_structure_folders
+from text_tools.insert_punctuation import insert_punctuation_on_substring
 from utils.download_dataset import  download_language_dataset, download_books_dataset, extract_transcript_files, extract_book_files
 from utils.utils import abbrev2language
 
@@ -129,7 +130,7 @@ def execution_text_convertion_pipeline(language_abbrev, input_folder, books_fold
     # Run folder restructuring
     for transcript_file in transcript_files_list:
         print('Executing {} file'.format(transcript_file))
-        output_folder = dirname(transcript_file)
+        output_folder = join(dirname(transcript_file), 'audio') # output_folder = dirname(transcript_file)
         change_structure_folders(transcript_file, output_folder)
 
     # Run substring search in books
@@ -157,7 +158,13 @@ def execution_text_convertion_pipeline(language_abbrev, input_folder, books_fold
 
     # Insert punctuation of the found substring in the transcript text
     for metadata_search in tqdm(glob(output_folder + '/**/**/output_search.txt' )):
-        insert_punctuation_on_substring(metadata_search, output_filepath)
+        # Defining output filepath
+        output_filepath = join(dirname(metadata_search), 'output_result.txt')
+        # Run insertion
+        insert_punctuation_on_substring(language_abbrev, metadata_search, output_filepath)
+
+    print("Finished text conversion.")
+
 
 def main():
     parser = argparse.ArgumentParser()

@@ -34,6 +34,6 @@ def remove_mp3_files(segment_filepath):
     '''
     Remove mp3 files.
     '''
-    mp3_filelist = glob(dirname(segment_filepath) + '/**/**/*.mp3')
+    mp3_filelist = glob(dirname(segment_filepath) + '/audio/**/**/*.mp3')
     for mp3_file in mp3_filelist:
         remove(mp3_file)

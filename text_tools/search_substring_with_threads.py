@@ -156,6 +156,7 @@ def search_substring_by_char(threads_result_queue, threads_sentinel, threads_con
 
     best_similarity = 0.0
     best_substring_found = False
+    #TODO: Corrigir start_position
     start = start_position
     extra_words = 10  # it is necessary to add extra words, because the punctuation is also counted.
     new_start = start
@@ -321,6 +322,7 @@ def search_substring_by_word(threads_result_queue, threads_sentinel, threads_con
 
     best_similarity = 0.0
     best_substring_found = False
+    #TODO: Corrigir start_position
     new_start = start_position
 
     # Iterates over the complete text_tools from position zero, increasing the initial position.

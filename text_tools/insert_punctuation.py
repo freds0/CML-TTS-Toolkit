@@ -2,15 +2,15 @@ import argparse
 from glob import glob
 from tqdm import tqdm
 from os.path import join, dirname
-from spacy.lang.pt import Portuguese
 from text_tools.custom_tokenizer import infix_re
+from text_tools.language_tokenizer import get_language_tokenizer
 import textdistance
 
 #from utils.nltk_sntencizer import sentencizer
 #from nltk.tokenize import word_tokenize
 
-nlp = Portuguese()
-nlp.tokenizer.infix_finditer = infix_re.finditer
+#nlp = Portuguese()
+#nlp.tokenizer.infix_finditer = infix_re.finditer
 
 # Defining what is punctuation
 punctuation = [',', '.', ';', ':', '?', '!', '—']
@@ -44,8 +44,9 @@ def find_trigram(trigram, text):
     return j
 
 
-def correct_punctuation(text_clean, text_punc):
-
+def correct_punctuation(language_abbrev, text_clean, text_punc):
+    # Defining language tokenizer
+    nlp = get_language_tokenizer(language_abbrev)
     # Defining begin and end tokens
     begin_token = '# # # '
     end_token = ' *'
@@ -68,7 +69,8 @@ def correct_punctuation(text_clean, text_punc):
 
     return new_text[len(begin_token) -1 : - len(end_token)] # Removing begining and ending token
 
-def insert_punctuation_on_substring(metadata_file, output_filepath):
+
+def insert_punctuation_on_substring(language_abbrev, metadata_file, output_filepath):
     with open(metadata_file) as f:
         content_file = f.readlines()
 
@@ -82,7 +84,7 @@ def insert_punctuation_on_substring(metadata_file, output_filepath):
         folder1, folder2, _ = filename.split('_')
         filepath = join(input_dir, folder1, folder2, filename + '.wav')
 
-        new_text = correct_punctuation(text_clean.strip(), text_punc.strip())
+        new_text = correct_punctuation(language_abbrev, text_clean.strip(), text_punc.strip())
         line = separator.join([filepath, new_text.strip(), text_punc.strip()])
         out_file.write(line + '\n')
 
@@ -92,6 +94,8 @@ def insert_punctuation_on_substring(metadata_file, output_filepath):
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--base_dir', default='./')
+    parser.add_argument('-l', '--language', default='pt',
+                        help='Language to download. pt: portuguese, pl: polish, it: italian, sp: spanish, fr: french, du: dutch, ge: german, en: english')
     parser.add_argument('--input_dir', default='mls_portuguese_opus')
     parser.add_argument('--csv_file', default='output_search.txt', help='Name of csv file')
     parser.add_argument('--out_file', default='output_revised.csv', help='Name of csv result ile')
@@ -102,7 +106,7 @@ def main():
     out_file = open(output_filepath, 'w')
     out_file.close()
     for metadata in tqdm(glob(join(args.base_dir, args.input_dir) + '/**/**/' + args.csv_file )):
-        insert_punctuation_on_substring(metadata, output_filepath)
+        insert_punctuation_on_substring(args.language, metadata, output_filepath)
 
 
 if __name__ == "__main__":
