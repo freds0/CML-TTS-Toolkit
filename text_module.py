@@ -11,11 +11,16 @@ from utils.utils import abbrev2language
 
 def search_substring_with_punctuation(language_abbrev, transcript_file, complete_text_file, search_type, output_file, number_threads):
     '''
-    Perform substring search for each substring of file transcript_file in a file complete_text_file
+    Perform substring search only for files with low similarity.
     '''
 
     with open(transcript_file) as f:
         transcripts_text = f.readlines()
+
+    older_transcript_text = False
+    if isfile (output_file):
+        with open(output_file) as f:
+            older_transcript_text = f.readlines()
 
     with open(complete_text_file) as f:
         book_text = f.read()
@@ -36,57 +41,22 @@ def search_substring_with_punctuation(language_abbrev, transcript_file, complete
     for filename, text in tqdm(transcripts_dict.items()):
         print('Processing {}'.format(filename))
 
-        if search_type == 'char':
-            text_result, similarity, start_position = execute_threads_search_substring_by_char(language_abbrev, text, book_text, start_position=0, similarity_metric='hamming', total_threads=int(number_threads))
-        else:
-            text_result, similarity, start_position = execute_threads_search_substring_by_word(language_abbrev, text, book_text, start_position=0, similarity_metric='hamming', total_threads=int(number_threads))
+        # search for sentences already executed
+        if older_transcript_text:
+            result = [line.strip() for line in older_transcript_text if filename in line]
+            if len(result) > 0:
+                filename, text, text_result, similarity = result[0].split('|')
+                if search_type=='word' or float(similarity) > 0.9:
 
-        if not text_result:
-            text_result = ''
-        total_similarity += similarity
+                    # Some information
+                    print(text.strip())
+                    print(text_result.strip())
+                    print(similarity)
 
-        # Some information
-        print(text.strip())
-        print(text_result.strip())
-        print(similarity)
-        # Write to file
-        line = separator.join([filename.strip(), text.strip(), text_result.strip(), str(similarity) + '\n'])
-        output_f.write(line)
-
-    print('Mean Similarity: {}'.format(total_similarity / len(transcripts_text)))
-    output_f.close()
-
-
-def keep_searching_substring_with_punctuation(language_abbrev, transcript_file, complete_text_file, search_type, output_file, number_threads):
-    '''
-    Perform substring search only for files with low similarity.
-    '''
-
-    with open(transcript_file) as f:
-        transcripts_text = f.readlines()
-
-    with open(complete_text_file) as f:
-        book_text = f.read()
-
-    output_f = open(output_file, "w")
-
-    # Cleaning complete text_tools
-    book_text = text_cleaning(book_text)
-
-    start_position = 0
-    separator = '|'
-    total_similarity = 0
-
-    # Iterates over each transcription
-    for line in tqdm(transcripts_text):
-        filename, text, text_result, similarity = line.split('|')
-
-        if float(similarity) > 0.9:
-            line = separator.join([filename.strip(), text.strip(), text_result.strip(), str(similarity.strip()) + '\n'])
-            output_f.write(line)
-            continue
-
-        print('Processing {}'.format(filename))
+                    total_similarity += float(similarity)
+                    line = separator.join([filename.strip(), text.strip(), text_result.strip(), str(similarity.strip()) + '\n'])
+                    output_f.write(line)
+                    continue
 
         if search_type == 'char':
             text_result, similarity, start_position = execute_threads_search_substring_by_char(language_abbrev, text, book_text, start_position=0, similarity_metric='hamming', total_threads=int(number_threads))
@@ -101,6 +71,7 @@ def keep_searching_substring_with_punctuation(language_abbrev, transcript_file, 
         print(text.strip())
         print(text_result.strip())
         print(similarity)
+
         # Write to file
         line = separator.join([filename.strip(), text.strip(), text_result.strip(), str(similarity) + '\n'])
         output_f.write(line)
@@ -151,7 +122,7 @@ def execution_text_convertion_pipeline(language_abbrev, input_folder, books_fold
 
             if len(content_output) == len(content_input):
                 # Perform substring search only for files with low similarity
-                keep_searching_substring_with_punctuation(language_abbrev, output_filepath, complete_text_file, search_type, output_filepath, int(threads_number))
+                search_substring_with_punctuation(language_abbrev, transcript_file, complete_text_file, search_type, output_filepath, int(threads_number))
                 continue
         # First execution of search
         search_substring_with_punctuation(language_abbrev, transcript_file, complete_text_file, search_type, output_filepath, int(threads_number))
