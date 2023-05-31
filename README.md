@@ -1,6 +1,6 @@
-# Multilingual LibriSpeech (MLS) Dataset Conversion Tools 
+# CML-TTS Conversion Tools 
 
-Set of tools to convert the MLS dataset. 
+Set of tools to convert the MLS to CML-TTS dataset. 
 
 ![mls_conversion_tools_process](imgs/mls_convertion_tools_process.png)
 
@@ -8,8 +8,8 @@ Set of tools to convert the MLS dataset.
 
 Create a conda env:
 ```
-$ conda create -n mls_converter python=3.8 pip
-$ conda activate mls_converter
+$ conda create -n cml-tts-toolkit python=3.8 pip
+$ conda activate cml-tts-toolkit 
 ```
 
 
@@ -18,7 +18,7 @@ sudo apt-get update
 sudo apt-get install ffmpeg
 
 ```
-Next, install the mls_converter requirements:
+Next, install the cml-tts-toolkit requirements:
 
 ```
 $ pip install -r requirements.txt
