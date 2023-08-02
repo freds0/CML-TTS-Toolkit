@@ -15,11 +15,11 @@ python3 recreate_cml_dataset.py \
 ```
 
 Where:
-    - FILEPATH.txt  indicates the filepath of the file containing the segments of a specific set (train, test, or dev).
-    - SR indicates the sampling rate of the files (22050 or 44100).
-    - OUTPUT_DIRECTORY is the directory where the CML-TTS Dataset will be reconstructed.
-    - AUDIO_FORMAT is the format of the files (wav or flac).
-    - MP3_QUALITY indicates the quality of the mp3 files to be downloaded (set to 64 if sampling_rate=22050, or 128 if sampling_rate=44100).
+- FILEPATH.txt  indicates the filepath of the file containing the segments of a specific set (train, test, or dev).
+- SR indicates the sampling rate of the files (22050 or 44100).
+- OUTPUT_DIRECTORY is the directory where the CML-TTS Dataset will be reconstructed.
+- AUDIO_FORMAT is the format of the files (wav or flac).
+- MP3_QUALITY indicates the quality of the mp3 files to be downloaded (set to 64 if sampling_rate=22050, or 128 if sampling_rate=44100).
 
 
 For example, to reconstruct the 'train' set of the CML-TTS Dataset in Portuguese, the command should be as follows:
