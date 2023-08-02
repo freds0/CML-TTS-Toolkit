@@ -1,6 +1,6 @@
 # CML-TTS Rebuild Tools 
 
-This repository allows you to reconstruct the CML-TTS dataset from segment files. To do this, you must download the txt files containing the segments, which are available at https://github.com/freds0/CML-TTS-Dataset.
+This repository allows you to reconstruct the CML-TTS dataset from segment files. To do this, you must download the txt files containing the segments, which are available at [Google Drive](https://drive.google.com/file/d/102DxVPyR9VgRFIZaFtEHJ3u_YAW9ZnEq/view?usp=sharing) and [One Drive](https://ufmtbr-my.sharepoint.com/:u:/g/personal/fredoliveira_ufmt_br/EScW5_fYuvtIslONTsyYJhsBiu8nzWwjDRFmMc8qBrpa7g?e=Ebrnrh).
 
 ## Rebuild CML-TTS Dataset
 
