@@ -1,64 +1,34 @@
-# CML-TTS Conversion Tools 
+# CML-TTS Rebuild Tools 
 
-Set of tools to convert the MLS to CML-TTS dataset. 
+This repository allows you to reconstruct the CML-TTS dataset from segment files. To do this, you must download the txt files containing the segments, which are available at https://github.com/freds0/CML-TTS-Dataset.
 
-![mls_conversion_tools_process](imgs/mls_convertion_tools_process.png)
+## Rebuild CML-TTS Dataset
 
-## Install
-
-Create a conda env:
+To recreate the CML-TTS Dataset, you need to execute the following command:
 ```
-$ conda create -n cml-tts-toolkit python=3.8 pip
-$ conda activate cml-tts-toolkit 
-```
-
-
-```
-sudo apt-get update
-sudo apt-get install ffmpeg
-
-```
-Next, install the cml-tts-toolkit requirements:
-
-```
-$ pip install -r requirements.txt
+python3 recreate_cml_dataset.py \
+    --input_segments=FILEPATH.txt \
+    --sampling_rate=SR \
+    --output_dir=OUTPUT_DIRECTORY \
+    --audio_format=AUDIO_FORMAT \ 
+    --audio_quality=MP3_QUALITY
 ```
 
-For an specific language, install Spacy:
+Where:
+    - FILEPATH.txt  indicates the filepath of the file containing the segments of a specific set (train, test, or dev).
+    - SR indicates the sampling rate of the files (22050 or 44100).
+    - OUTPUT_DIRECTORY is the directory where the CML-TTS Dataset will be reconstructed.
+    - AUDIO_FORMAT is the format of the files (wav or flac).
+    - MP3_QUALITY indicates the quality of the mp3 files to be downloaded (set to 64 if sampling_rate=22050, or 128 if sampling_rate=44100).
+
+
+For example, to reconstruct the 'train' set of the CML-TTS Dataset in Portuguese, the command should be as follows:
 
 ```
-# Portuguese
-$ python3 -m spacy download pt_core_news_md
-# Polish
-$ python3 -m spacy download pl_core_news_sm
-# Italian
-$ python3 -m spacy download it_core_news_sm
-# Spanish
-$ python3 -m spacy download es_core_news_sm
-# French
-$ python3 -m spacy download fr_core_news_sm
-# Dutch
-$ python3 -m spacy download nl_core_news_sm
-# German
-$ python3 -m spacy download de_core_news_sm
-# English
-$ python3 -m spacy download en_core_web_sm
-```
-
-## Audio Converter
-
-This script downloads the original audio files directly from librivox and converts them to a better quality sample rate (22kHz as default). It is necessary to define the language, which will be downloaded, and extract the files needed to download each file separately.
-
-```
-python3 execute_audio_converter.py --language=pt --sampling_rate=22050 --audio_format=wav
-```
-
-## Text Converter
-
-Given a file of transcripts (without punctuation) and a file containing the texts of the books with punctuation (but with errors), this script adds punctuation in the transcripts. 
-
-To do this, perform a search for each sentence in the text of the books. As the texts are long and are not necessarily in sequence, this script creates threads, which divide the text from the books and search separately for the corresponding sentence.
-
-```
-python3 execute_text_converter_on_folder.py --base_dir=./ --metric=hamming --input_folder=./input/train --books_folder=./lv_text/portuguese/ --number_threads=10 --search_type=word
+python3 recreate_cml_dataset.py \
+    --input_segments=cml_train_segments_pt.txt \
+    --sampling_rate=22050 \
+    --output_dir=mls_portuguese_opus/train/audio \
+    --audio_format=wav \ 
+    --audio_quality=64
 ```

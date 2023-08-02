@@ -52,7 +52,7 @@ def create_segments_list(segments_filepath, sampling_rate = 22050, audio_format 
         content_data = f.readlines()
 
         for line in tqdm(content_data):
-
+            print(line)
             filename, link, begin, end = line.strip().split("\t")
             # Get files path
             folder1, folder2, fileid = filename.split('_')
@@ -69,13 +69,14 @@ def create_segments_list(segments_filepath, sampling_rate = 22050, audio_format 
                 # Verify if 64 mp3 exists
                 mp3_filepath = get_filepath_from_link(link, output_path)
                 if not exists(mp3_filepath):
+                    print(f"It doesnt exist: {mp3_filepath}")
                     continue
             else:
                 # Uses 128 mp3 file
                 mp3_filepath = mp3_filepath128
 
             output_filepath = join(output_path, filename + extension_file)
-
+            print(output_filepath)
             # Verify sample rate
             info = mediainfo(mp3_filepath)
             if int(info['sample_rate']) < int(sampling_rate):
@@ -88,6 +89,7 @@ def create_segments_list(segments_filepath, sampling_rate = 22050, audio_format 
 
             # Build a segment list
             segment = Segment(begin, end, mp3_filepath, output_filepath)
+            print(mp3_filepath)
             if head is None:
                 head = segment
             else:
