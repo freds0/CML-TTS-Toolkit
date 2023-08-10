@@ -32,3 +32,23 @@ python3 recreate_cml_dataset.py \
     --audio_format=wav \ 
     --audio_quality=64
 ```
+
+
+## Create CML-TTS Dataset Segments
+
+If for some reason you are unable (or unwilling) to use the CML-TTS dataset segments, and want to recreate them, you can use the following script, which uses the CML-TTS Dataset files and the MLS dataset segments:
+
+
+```
+python3 create_segment_file.py \
+    --cml_csv=FILEPATH.txt \
+    --cml_dir=DATASET_DIR \
+    --mls_csv=MLS_SEGMENTS_FILEPATH.csv \
+    --output_csv=OUTPUT_CML_SEGMENTS_FILEPATH.txt
+```
+
+Where:
+- FILEPATH.txt  indicates the filepath of the file containing the segments of a specific set (train, test, or dev), where each line contains: "wav_filename,wav_filesize,transcript,transcript_wav2vec,levenshtein,duration,num_words,client_id".
+- DATASET_DIR is the directory where is the CML-TTS Dataset.
+- MLS_SEGMENTS_FILEPATH is the MLS Dataset segments csv file.
+- OUTPUT_CML_SEGMENTS_FILEPATH is the filepath of the output file containing the CML segments.
