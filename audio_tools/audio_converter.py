@@ -68,20 +68,21 @@ def create_segments_list(segments_filepath, sampling_rate = 22050, audio_format 
             if not exists(mp3_filepath128) and int(audio_quality) == 64:
                 # Verify if 64 mp3 exists
                 mp3_filepath = get_filepath_from_link(link, output_path)
-                if not exists(mp3_filepath):
-                    print(f"It doesnt exist: {mp3_filepath}")
-                    continue
             else:
                 # Uses 128 mp3 file
                 mp3_filepath = mp3_filepath128
 
+            # ignore if doesnt exist
+            if not exists(mp3_filepath):
+                print(f"It doesnt exist: {mp3_filepath}")
+                continue
+
             output_filepath = join(output_path, filename + extension_file)
-            print(output_filepath)
+
             # Verify sample rate
             info = mediainfo(mp3_filepath)
             if int(info['sample_rate']) < int(sampling_rate):
                 print('Ignoring {} sr = {}'.format(mp3_filepath, info['sample_rate']))
-                continue;
 
             # Creating segment
             begin = float(begin)*1000
@@ -89,7 +90,6 @@ def create_segments_list(segments_filepath, sampling_rate = 22050, audio_format 
 
             # Build a segment list
             segment = Segment(begin, end, mp3_filepath, output_filepath)
-            print(mp3_filepath)
             if head is None:
                 head = segment
             else:
@@ -112,7 +112,7 @@ def create_audio_files_from_segments_list(head_list, total_files, sampling_rate=
         filepath = curr.filepath
         sound = AudioSegment.from_file(audio_file, frame_rate=sampling_rate, channels=1)
         audio_segment = sound[begin:end]
-        #print("Exporting {}".format(filepath))
+        # print("Exporting {}".format(filepath))
         try:
             if audio_format == 'wav':
                 if not exists(filepath) or force_write:

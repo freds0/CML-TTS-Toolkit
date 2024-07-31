@@ -1,0 +1,1 @@
+python3 recreate_cml_dataset.py --input_segments=/media/ecasanova/data2/Datasets/CML-TTS-44kHz/segments/cml_tts_dataset_segments_v0.1/cml_train_segments_pt_few_samples.txt --sampling_rate=44100 --output_dir=/media/ecasanova/data2/Datasets/CML-TTS-44kHz/filtered/cml_train_segments_pt_test/ --audio_format="flac"  --audio_quality 64 --remove_mp3_files
