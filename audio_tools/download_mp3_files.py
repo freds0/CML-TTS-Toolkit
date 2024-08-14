@@ -74,8 +74,14 @@ def download_mp3_from_dict(links_dict='', audio_quality=64, output_dir='./', for
             try:
                 urllib.request.urlretrieve(link, mp3_filepath)
             except:
-                print("Conection problem to acess {}... ".format(link))
-                continue
+                print("Conection problem to acess {}... ".format(link), mp3_filepath)
+                # if target file doesnt exist try the base file
+                try:
+                    link = link.replace("_64kb.mp3", ".mp3").replace("_128kb.mp3", ".mp3")
+                    urllib.request.urlretrieve(link, mp3_filepath)
+                except:
+                    print("Conection problem to acess {} as well...  ".format(link))
+                    continue
             
             # Wait to avoid ip blocking
             time.sleep(randrange(7,15))
