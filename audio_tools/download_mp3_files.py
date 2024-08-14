@@ -61,7 +61,7 @@ def download_mp3_from_dict(links_dict='', audio_quality=64, output_dir='./', for
 
         # Print status
         #print('Download {} / {} file: {}'.format(i, total, mp3_filename))
-
+        # print(mp3_filepath, isfile(mp3_filepath))
         # Verify if mp3 file exists
         if not isfile(mp3_filepath):
             # if site is down wait
@@ -76,9 +76,11 @@ def download_mp3_from_dict(links_dict='', audio_quality=64, output_dir='./', for
             except:
                 print("Conection problem to acess {}... ".format(link))
                 continue
+            
+            # Wait to avoid ip blocking
+            time.sleep(randrange(7,15))
         else:
             print('File {} already downloaded.'.format(mp3_filepath))
             continue
-        # Wait to avoid ip blocking
-        time.sleep(randrange(15,30))
+
     return True

@@ -50,9 +50,12 @@ def create_segments_list(segments_filepath, sampling_rate = 22050, audio_format 
     head = None
     with open(segments_filepath) as f :
         content_data = f.readlines()
-
+        # sort to order audiobooks and speedup
+        content_data.sort()
+        prev = None
+        ignored = 0
         for line in tqdm(content_data):
-            print(line)
+            # print(line)
             filename, link, begin, end = line.strip().split("\t")
             # Get files path
             folder1, folder2, fileid = filename.split('_')
@@ -80,9 +83,15 @@ def create_segments_list(segments_filepath, sampling_rate = 22050, audio_format 
             output_filepath = join(output_path, filename + extension_file)
 
             # Verify sample rate
-            info = mediainfo(mp3_filepath)
+            if prev is not None and prev.filesource == mp3_filepath:
+                pass
+            else:
+                info = mediainfo(mp3_filepath)
+
             if int(info['sample_rate']) < int(sampling_rate):
                 print('Ignoring {} sr = {}'.format(mp3_filepath, info['sample_rate']))
+                ignored +=1
+                continue
 
             # Creating segment
             begin = float(begin)*1000
@@ -96,6 +105,8 @@ def create_segments_list(segments_filepath, sampling_rate = 22050, audio_format 
                 prev.set_next(segment)
             prev = segment
 
+    print("Num ignored files:", ignored)
+
     return head, len(content_data)
 
 
@@ -103,24 +114,33 @@ def create_audio_files_from_segments_list(head_list, total_files, sampling_rate=
     '''
     Creates audio segments from a linked segment list.
     '''
+    print()
     curr = head_list
     pbar = tqdm(total=total_files)
+    prev_file_source = None
     while curr is not None:
         audio_file = curr.filesource
         begin = curr.begin
         end = curr.end
         filepath = curr.filepath
-        sound = AudioSegment.from_file(audio_file, frame_rate=sampling_rate, channels=1)
+        current_file_source = audio_file
+        # print(audio_file)
+        if prev_file_source is None or prev_file_source != audio_file:
+            # sound = AudioSegment.from_file(audio_file, frame_rate=sampling_rate, channels=1)
+            sound = AudioSegment.from_file(audio_file)
+
         audio_segment = sound[begin:end]
         # print("Exporting {}".format(filepath))
         try:
             if audio_format == 'wav':
                 if not exists(filepath) or force_write:
+                    audio_segment.set_frame_rate(sampling_rate)
                     audio_segment.export(filepath, format = "wav")
                 else:
                     print('Segment {} already exists!'.format(filepath))
             else:
                 if not exists(filepath) or force_write:
+                    audio_segment.set_frame_rate(sampling_rate)
                     audio_segment.export(filepath, format = "flac")
                 else:
                     print('Segment {} already exists!'.format(filepath))
@@ -130,6 +150,7 @@ def create_audio_files_from_segments_list(head_list, total_files, sampling_rate=
           return False
         else:
             curr = curr.next
+        prev_file_source = audio_file
         pbar.update(1)
 
     pbar.close()
